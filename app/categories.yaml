@@ -1,0 +1,47 @@
+ecommerce_product:
+  label: Online shopping
+  required: [platform, product, amount, date, problem, resolution]
+  optional: [seller, order_id]
+  hints:
+    platform: Which shopping app or website did you use?
+    product: What did you buy?
+    amount: How much did you pay?
+    date: When did you place the order?
+    problem: What went wrong?
+    resolution: Would you like a refund, replacement, or another solution?
+  route: consumer
+delivery_or_food:
+  label: Delivery & food
+  required: [platform, date, amount, problem, resolution]
+  optional: [order_id, product]
+  hints:
+    platform: Which delivery or food app did you use?
+    date: When did you place the order?
+    amount: How much did you pay?
+    problem: What went wrong with your order?
+    resolution: What would you like the company to do?
+  route: consumer
+upi_payment_failure:
+  label: UPI & payments
+  required: [app_or_bank, amount, date, time, problem]
+  optional: [transaction_id, receiver, resolution]
+  hints:
+    app_or_bank: Which payment app or bank did you use?
+    amount: How much money was involved?
+    date: On which date did this happen?
+    time: Around what time did this happen?
+    problem: What happened to the payment?
+  route: banking
+defective_goods_or_overcharge:
+  label: Shop purchases
+  required: [shop, place, product, amount, date, problem, bill_available]
+  optional: [resolution]
+  hints:
+    shop: What is the shop's name?
+    place: Where is the shop?
+    product: What did you buy?
+    amount: How much were you charged?
+    date: When did you buy it?
+    problem: What went wrong?
+    bill_available: Do you have a bill or receipt?
+  route: consumer

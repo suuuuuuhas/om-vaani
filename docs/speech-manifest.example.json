@@ -1,0 +1,4 @@
+[
+  {"file":"sample01.ogg","language":"te-IN","condition":"quiet, Telugu-English code mix","consent":false,"reference":"Replace with the exact words from a real consenting speaker"},
+  {"file":"sample02.ogg","language":"te-IN","condition":"background noise","consent":false,"reference":"Replace with the exact words from a real consenting speaker"}
+]
