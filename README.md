@@ -4,7 +4,7 @@ A Phase 1 implementation of `docs/original-plan.md`, named Om Vaani (ॐ वा�
 
 ## Hosted app
 
-Production: https://om-vaani.vercel.app, in the approved Vercel team `suhas-projects13`. The FastAPI function runs in Mumbai (`bom1`), using the new free Om Vaani Supabase project in Mumbai (`ap-south-1`). Cloud draft persistence, shared rate limits, per-session leases, private audio signed links and lookup have been verified. The separate Gnani STT, Gnani TTS and Gemini keys are saved in the ignored local key file and encrypted Vercel production variables. The live page reports keys configured. The full hosted synthetic Telugu voice-to-confirmed-draft flow passes with the latest Gemini key; the initial turn took about 15 seconds. To update keys and redeploy:
+Production: https://om-vaani.vercel.app, in the approved Vercel team `suhas-projects13`. The FastAPI function runs in Mumbai (`bom1`), using the new free Om Vaani Supabase project in Mumbai (`ap-south-1`). Cloud draft persistence, shared rate limits, per-session leases, private audio signed links and lookup have been verified. The separate Gnani STT, Gnani TTS and Gemini keys are saved in the ignored local key file and encrypted Vercel production variables. The live page reports keys configured. The complete hosted synthetic Telugu voice-to-draft flow has passed. The original combined reply took about 15 seconds; the browser now shows text before audio. See docs/latency-results.json for the latest measured flow. To update keys and redeploy:
 
 ```powershell
 .\.venv\Scripts\python.exe scripts/configure_vercel.py
@@ -133,6 +133,6 @@ The report records word errors and latency. Review amounts, dates, brands and re
 
 ## Scope still gated
 
-No phone-call implementation, outbound calls, government/company portal submissions, public deployment, social posting, account creation, demo-video generation, or competition eligibility/deadline verification is included in this local build. Phone Phase 2 requires the user's separate confirmation. The original plan is preserved as input context, not treated as permission to publish or contact people.
+Phone calls, outbound calls, government/company portal submissions, social posting, new user-account creation, demo-video generation, and competition eligibility/deadline verification remain outside this build. Phone Phase 2 requires the user's separate confirmation. The original plan is preserved as input context, not treated as permission to publish or contact people.
 
 See `docs/sources.md` for the official documentation checked and `docs/verification.md` for current verification status.

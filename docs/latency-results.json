@@ -1,0 +1,37 @@
+{
+  "test": "written_english_text_first_flow",
+  "base_url": "https://om-vaani.vercel.app",
+  "text_ready_wall_ms": 4914,
+  "text_stage_ms": {
+    "load_session": 49,
+    "transcription": 0,
+    "gemini": 4413,
+    "speech_synthesis": 0,
+    "audio_storage": 0,
+    "save_session": 49
+  },
+  "first_voice_after_text_wall_ms": 4804,
+  "voice_stage_ms": {
+    "speech_synthesis": 4162,
+    "audio_storage": 147
+  },
+  "confirmation_text_wall_ms": 366,
+  "confirmation_stage_ms": {
+    "load_session": 36,
+    "transcription": 0,
+    "gemini": 0,
+    "speech_synthesis": 0,
+    "audio_storage": 0,
+    "save_session": 43
+  },
+  "confirmation_voice_after_text_wall_ms": 6727,
+  "correction_text_wall_ms": null,
+  "confirmed_while_first_speech_running": true,
+  "audio_downloads_passed": true,
+  "draft_lookup_passed": true,
+  "wrong_pin_denied": true,
+  "real_speaker_accuracy_verified": false,
+  "measured_date": "2026-10-25",
+  "sample_size": 1,
+  "automated_tests_passed": 48
+}

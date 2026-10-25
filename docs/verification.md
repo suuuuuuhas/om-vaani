@@ -28,8 +28,11 @@
 
 - Text-first browser mode is deployed: reply text is returned before a separate authenticated speech request. Speech IDs bind audio to the original turn; new messages cannot change its content. Shared HTTP clients reuse connections within each app event loop. Server-Timing and stage metrics are available.
 - Hosted intake measurements returned text in 6,928 ms and 5,485 ms for synthetic Telugu audio, and 3,961 ms for written English. Complete profiling was interrupted first by a missing spoken date, then by a local connection error and simultaneous TTS requests receiving HTTP 429. These are individual measurements, not a percentile benchmark.
-- Gnani speech calls are now serialized within each app loop, with one bounded retry on HTTP 429; the browser also queues its audio requests. Final hosted queue validation is pending.
-- Private source repository created at https://github.com/suuuuuuhas/om-vaani with a Codespaces dev-container configuration. Source push and remote hash verification are in progress. API keys, runtime data and Vercel link metadata remain excluded from Git.
+- Gnani speech calls are now serialized within each app loop, with one bounded retry on HTTP 429; the browser also queues its audio requests. The hosted overlap test now returns 200 for both speech requests.
+- Private source repository created at https://github.com/suuuuuuhas/om-vaani with a Codespaces dev-container configuration. The initial source push and remote hash verification passed. API keys, runtime data and Vercel link metadata remain excluded from Git.
+
+- Final hosted written-English text-first flow passes: text returned in 4,914 ms; draft confirmation returned in 366 ms while the first speech request was still active. Both generated audio files downloaded successfully; correct and incorrect phone-suffix lookups behaved correctly. First voice arrived 4,804 ms after its text; confirmation voice arrived 6,727 ms after its text. These are single-run measurements. Evidence: docs/latency-results.json.
+- The Codespaces configuration is committed and ready to use; no running Codespace or managed Cloud Environment instance was created.
 
 ## Outstanding
 
