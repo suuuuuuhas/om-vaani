@@ -16,6 +16,7 @@ import { lookupMessage } from "@/lib/i18n";
 import type { ExecutionMode, TriageResult } from "@/lib/types";
 import { checkSensitiveContent } from "@/lib/privacy/guard";
 import { VaaniSaty } from "@/components/voice/vaani-saty";
+import { VoiceLanguageSelect } from "@/components/voice/language-select";
 
 const MAX_CHARS = 4000;
 
@@ -28,6 +29,7 @@ export function IntakeSection() {
   const [consentError, setConsentError] = useState(false);
   const [voiceLanguage, setVoiceLanguage] = useState<string | undefined>();
   const [extraTranscript, setExtraTranscript] = useState("");
+  const [hasVoice, setHasVoice] = useState(false);
   const [status, setStatus] = useState<
     "idle" | "loading" | "blocked" | "error"
   >("idle");
@@ -132,10 +134,12 @@ export function IntakeSection() {
 
       <form onSubmit={handleSubmit} noValidate className="min-w-0">
         <VaaniSaty onTranscript={(transcript, language) => {
+          setHasVoice(true);
           const combined = [text.trim(), transcript].filter(Boolean).join(" ");
           if (combined.length > MAX_CHARS) { setExtraTranscript(transcript); return; }
           setExtraTranscript(""); setVoiceLanguage(language ?? undefined); setText(combined);
         }} />
+        {hasVoice && <VoiceLanguageSelect value={voiceLanguage ?? ""} onChange={value => setVoiceLanguage(value || undefined)} disabled={status === "loading"} />}
         {extraTranscript && <div role="alert" className="mt-3 rounded-control border border-warn/40 bg-warn/10 p-3 text-sm">
           <p>{locale === "hi" ? "पूरा विवरण बहुत लंबा है। नीचे की रिकॉर्डिंग से ज़रूरी पाठ कॉपी करके ऊपर का विवरण छोटा करें।" : locale === "te" ? "పూర్తి వివరణ చాలా పొడవుగా ఉంది. కింది వచనంలో అవసరమైనది కాపీ చేసి వివరణను కుదించండి." : "The full description is too long. Copy the relevant part of this transcript and shorten the description."}</p>
           <textarea aria-label={locale === "hi" ? "अतिरिक्त रिकॉर्डिंग का पाठ" : locale === "te" ? "అదనపు రికార్డింగ్ వచనం" : "Additional recording transcript"} readOnly value={extraTranscript} rows={4} className="mt-2 w-full rounded-control border border-line bg-surface p-2" />

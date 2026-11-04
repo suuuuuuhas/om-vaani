@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ListenButton } from "@/components/voice/listen-button";
 import { VaaniSaty } from "@/components/voice/vaani-saty";
+import { VoiceLanguageSelect } from "@/components/voice/language-select";
 import {
   ArrowLeft,
   CheckCircle,
@@ -51,6 +52,7 @@ export function ReviewClient() {
   const [retryError, setRetryError] = useState(false);
   const [followupLanguage, setFollowupLanguage] = useState<string | undefined>();
   const [extraFollowup, setExtraFollowup] = useState("");
+  const [hasFollowupVoice, setHasFollowupVoice] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const draft = store?.draft ?? null;
@@ -84,10 +86,11 @@ export function ReviewClient() {
     if (!draft || retrying) return;
     setRetrying(true);
     setRetryError(false);
+    const responseLanguage = followupLanguage === "" ? undefined : followupLanguage ?? draft.voiceLanguage;
     try {
       const response = await fetch("/api/ai/triage", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: originalText.trim(), locale, voiceLanguage: followupLanguage ?? draft.voiceLanguage })
+        body: JSON.stringify({ text: originalText.trim(), locale, voiceLanguage: responseLanguage })
       });
       if (!response.ok) throw new Error("retry unavailable");
       const result = (await response.json()) as { data: TriageResult; mode: "gemini" | "openai" | "fallback" };
@@ -100,7 +103,7 @@ export function ReviewClient() {
       const updatedText = originalText.trim();
       setFields(updatedFields);
       setInitializedFor(updatedText);
-      saveDraft({ ...draft, text: updatedText, voiceLanguage: followupLanguage ?? draft.voiceLanguage,
+      saveDraft({ ...draft, text: updatedText, voiceLanguage: responseLanguage,
         triage: result.data, mode: result.mode, reviewFields: updatedFields,
         reviewSystem: system ?? undefined, reviewSubflow: subflow });
     } catch {
@@ -387,6 +390,7 @@ export function ReviewClient() {
           <h2 id="voice-followup-heading" className="text-base font-bold">{locale === "hi" ? "बोलकर और जानकारी जोड़ें" : locale === "te" ? "మాట్లాడి మరిన్ని వివరాలు చేర్చండి" : "Add details by voice"}</h2>
           <p className="mt-1 text-sm text-ink-secondary">{locale === "hi" ? "वाणी को बाकी जानकारी बताएँ, फिर नीचे लिखे विवरण की जाँच करें।" : locale === "te" ? "మిగిలిన వివరాలను వాణికి చెప్పి, కింద ఉన్న వచనాన్ని పరిశీలించండి." : "Tell Vaani anything you missed, then review the text below."}</p>
           <VaaniSaty disabled={retrying} onTranscript={(transcript, language) => {
+            setHasFollowupVoice(true);
             const combined = [originalText.trim(), transcript].filter(Boolean).join(" ");
             if (combined.length > 4000) { setExtraFollowup(transcript); return; }
             setExtraFollowup("");
@@ -394,6 +398,7 @@ export function ReviewClient() {
             setOriginalText(combined);
             setRetryError(false);
           }} />
+          {(hasFollowupVoice || Boolean(draft?.voiceLanguage)) && <VoiceLanguageSelect value={followupLanguage ?? draft?.voiceLanguage ?? ""} onChange={setFollowupLanguage} disabled={retrying} />}
           {extraFollowup && <div role="alert" className="mt-2 text-xs text-bad"><p>{locale === "hi" ? "विवरण बहुत लंबा है। इस पाठ से ज़रूरी हिस्सा कॉपी करें और विवरण छोटा करें।" : locale === "te" ? "వివరణ చాలా పొడవుగా ఉంది. అవసరమైన వచనాన్ని కాపీ చేసి వివరణను కుదించండి." : "The description is too long. Copy the relevant part of this transcript and shorten the description."}</p><textarea aria-label={locale === "hi" ? "अतिरिक्त रिकॉर्डिंग का पाठ" : locale === "te" ? "అదనపు రికార్డింగ్ వచనం" : "Additional recording transcript"} readOnly value={extraFollowup} rows={4} className="mt-2 w-full rounded-control border border-line bg-background p-2" /></div>}
           <label htmlFor="voice-followup-text" className="mt-4 block text-sm font-semibold">{locale === "hi" ? "पूरा विवरण जाँचें और सुधारें" : locale === "te" ? "పూర్తి వివరణను పరిశీలించి సవరించండి" : "Review and correct the full description"}</label>
           <textarea id="voice-followup-text" disabled={retrying} value={originalText} onChange={event => setOriginalText(event.target.value.slice(0, 4000))} maxLength={4000} rows={5} className="mt-2 w-full resize-y rounded-control border border-line bg-background px-3 py-2 text-sm" />
