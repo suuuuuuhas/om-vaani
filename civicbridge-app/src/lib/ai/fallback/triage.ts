@@ -31,9 +31,7 @@ export function fallbackTriage(text: string, locale: Locale): TriageResult {
     summary: fallbackSummary(winner, locale, topicPhrase(extracted)),
     extractedFields: extracted,
     missingFields:
-      score > 0 && missing.length > 0
-        ? missing
-        : adapterFieldKeys.slice(0, 3),
+      score > 0 ? missing : adapterFieldKeys.slice(0, 3),
     confidence: fallbackConfidence(score),
     urgency: fallbackUrgency(text),
     disclaimer: fallbackDisclaimer(locale)

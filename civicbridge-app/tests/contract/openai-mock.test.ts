@@ -62,6 +62,17 @@ describe("triage service contract", () => {
     expect(result.data.extractedFields.orderNumber).toBe("ORD-778812");
   });
 
+  it("extracts stated consumer details without marking complete fields missing", async () => {
+    const value = JSON.parse(VALID_TRIAGE_JSON);
+    Object.assign(value.fields, { merchant: "ShopKart", productName: "mixer", purchaseDate: "2026-10-01", complaintNumber: "C123" });
+    const client = fakeClient(async () => ({ output_text: JSON.stringify(value) }));
+    const result = await triageGrievance("ShopKart mixer bought 2026-10-01, order ORD-778812, Rs 2400, complaint C123. Refund refused.", "en", client);
+    expect(result.data.extractedFields.merchant).toBe("ShopKart");
+    expect(result.data.extractedFields.productName).toBe("mixer");
+    expect(result.data.extractedFields.purchaseDate).toBe("2026-10-01");
+    expect(result.data.missingFields).toEqual([]);
+  });
+
   it("falls back on malformed JSON", async () => {
     const client = fakeClient(async () => ({
       output_text: '{"system": "nch", broken...'

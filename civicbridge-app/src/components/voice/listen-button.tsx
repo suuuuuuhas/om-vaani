@@ -23,5 +23,5 @@ export function ListenButton({ text, locale, autoPlay = false }: { text: string;
     const key = `${locale}\u0000${text}`;
     if (autoPlay && autoRequested.current !== key) { autoRequested.current = key; void listen(); }
   }, [autoPlay, listen, locale, text]);
-  return <div className="mt-2"><button type="button" onClick={() => void listen()} disabled={busy} className="rounded-control border border-line px-3 py-2 text-xs font-semibold text-accent disabled:opacity-50">{busy ? "Preparing voice…" : "Listen with Vaani"}</button><span className="ml-2 text-xs text-ink-secondary">Uses Gnani voice</span>{audioSrc && <audio className="mt-2 max-w-full" src={audioSrc} controls autoPlay={autoPlay} />}{error && <p role="status" className="mt-1 text-xs text-bad">{error}</p>}</div>;
+  return <div className="mt-2"><button type="button" onClick={() => void listen()} disabled={busy} className="rounded-control border border-line px-3 py-2 text-xs font-semibold text-accent disabled:opacity-50">{busy ? "Preparing voice…" : "Listen with Vaani"}</button><span className="ml-2 text-xs text-ink-secondary">Uses Gnani voice</span>{audioSrc && <audio className="mt-2 max-w-full" src={audioSrc} controls autoPlay />}{error && <p role="status" className="mt-1 text-xs text-bad">{error}</p>}</div>;
 }

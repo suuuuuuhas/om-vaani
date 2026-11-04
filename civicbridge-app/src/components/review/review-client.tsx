@@ -53,7 +53,7 @@ export function ReviewClient() {
 
   // Initialize editable state once the draft arrives from the intake page.
   const [initializedFor, setInitializedFor] = useState<string | null>(null);
-  const draftKey = triage ? `${draft?.text.slice(0, 40)}|${locale}` : null;
+  const draftKey = triage ? draft?.text ?? null : null;
   if (triage && draftKey && initializedFor !== draftKey) {
     setInitializedFor(draftKey);
     setSystem(triage.system);
