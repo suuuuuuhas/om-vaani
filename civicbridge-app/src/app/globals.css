@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+.portal-shell{min-height:100dvh;display:grid;grid-template-columns:240px minmax(0,1fr)}
+.portal-sidebar{position:sticky;top:0;height:100dvh;background:#162d55;color:#eaf0fa;padding:26px 18px;display:flex;flex-direction:column}
+.portal-logo{display:flex;gap:12px;align-items:center;text-decoration:none;font-size:18px}.portal-logo>span{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:#3266b6;font-size:24px}.portal-logo strong small{display:block;font-size:10px;font-weight:400;color:#b2c6e7;margin-top:2px}.portal-sidebar-label{margin:42px 12px 12px;color:#a8bad6;font-size:10px;font-weight:700;letter-spacing:.1em}.portal-sidebar nav{display:grid;gap:5px}.portal-sidebar nav a{display:flex;gap:14px;align-items:center;padding:12px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600}.portal-sidebar nav a:hover{background:#ffffff20}.portal-sidebar-bottom{margin-top:auto;border-top:1px solid #ffffff30;padding:20px 12px 0;font-size:11px;color:#b4c6df}.portal-sidebar-bottom p{margin-top:8px;line-height:1.6}.portal-content{min-width:0;background:var(--background)}
+@media(max-width:800px){.portal-shell{display:block}.portal-sidebar{position:static;width:auto;height:auto;padding:13px 18px;flex-direction:row;align-items:center;justify-content:space-between;gap:12px}.portal-logo{font-size:15px}.portal-logo>span{width:36px;height:36px;font-size:20px}.portal-logo strong small,.portal-sidebar-label,.portal-sidebar-bottom{display:none}.portal-sidebar nav{display:flex;gap:3px}.portal-sidebar nav a{padding:8px;font-size:11px}.portal-sidebar nav a:nth-child(3){display:none}}
+
+/*
+ * CivicBridge design tokens.
+ * Dials: DESIGN_VARIANCE 3, MOTION_INTENSITY 2, VISUAL_DENSITY 5
+ * -> trust-first public-sector layout, restrained transitions only,
+ *    standard web-app spacing. One cobalt accent; off-white/charcoal surfaces.
+ */
+
+@theme inline {
+  --font-sans: var(--font-noto-latin), var(--font-noto-devanagari),
+    var(--font-noto-telugu), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", "Segoe UI Mono", monospace;
+
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-sunken: var(--sunken);
+  --color-ink: var(--ink);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-onaccent: var(--onaccent);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
+
+  --radius-control: 8px;
+  --radius-card: 12px;
+}
+
+:root {
+  --background: #f6f6f3;
+  --surface: #ffffff;
+  --sunken: #eeeef0;
+  --ink: #21252c;
+  --ink-secondary: #4b5361;
+  --line: #d8d9d2;
+  --accent: #0b4fb3;
+  --accent-strong: #093e8f;
+  --accent-soft: #e3ecfa;
+  --onaccent: #ffffff;
+  --ok: #1e6e3c;
+  --warn: #8a5200;
+  --bad: #b3261e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #14171c;
+    --surface: #1d2129;
+    --sunken: #262c37;
+    --ink: #ecede8;
+    --ink-secondary: #a9b1bd;
+    --line: #39414f;
+    --accent: #8ab1f5;
+    --accent-strong: #a7c4f8;
+    --accent-soft: #24344f;
+    --onaccent: #0d1830;
+    --ok: #63c78f;
+    --warn: #e5a54b;
+    --bad: #f08c84;
+  }
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Restrained state transitions only (MOTION_INTENSITY 2). */
+a,
+button,
+input,
+select,
+textarea,
+summary {
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease,
+    box-shadow 140ms ease,
+    transform 80ms ease;
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::placeholder {
+  color: var(--ink-secondary);
+  opacity: 0.75;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

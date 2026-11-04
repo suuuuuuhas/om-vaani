@@ -1,0 +1,32 @@
+# Dependency directories
+node_modules/
+
+# Next.js build output
+.next/
+.next-build/
+.next-clean/
+*.tsbuildinfo
+out/
+next-env.d.ts
+
+# Production
+build/
+dist/
+
+# Environment files - never commit secrets
+.env
+.env*.local
+
+# Testing
+coverage/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.log
+
+.vercel
