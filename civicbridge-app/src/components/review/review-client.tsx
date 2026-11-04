@@ -37,7 +37,7 @@ function confidenceLabel(confidence: number): "high" | "medium" | "low" {
 
 export function ReviewClient() {
   const router = useRouter();
-  const { dict, locale, store, addCase } = useApp();
+  const { dict, locale, store, addCase, saveDraft } = useApp();
 
   const [system, setSystem] = useState<SystemId | null>(null);
   const [subflow, setSubflow] = useState<RailwaySubflow | undefined>(undefined);
@@ -46,6 +46,8 @@ export function ReviewClient() {
   const [withReceipt, setWithReceipt] = useState(false);
   const [withScreenshot, setWithScreenshot] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [retrying, setRetrying] = useState(false);
+  const [retryError, setRetryError] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const draft = store?.draft ?? null;
@@ -73,6 +75,34 @@ export function ReviewClient() {
 
   function updateField(key: string, value: string) {
     setFields((prev) => ({ ...prev, [key]: value }));
+  }
+
+  async function retryAnalysis() {
+    if (!draft || retrying) return;
+    setRetrying(true);
+    setRetryError(false);
+    try {
+      const response = await fetch("/api/ai/triage", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: originalText.trim(), locale, voiceLanguage: draft.voiceLanguage })
+      });
+      if (!response.ok) throw new Error("retry unavailable");
+      const result = (await response.json()) as { data: TriageResult; mode: "gemini" | "openai" | "fallback" };
+      if (result.mode === "fallback") throw new Error("retry unavailable");
+      // Keep the user's category and edits; only fill empty fields from the new analysis.
+      setFields(previous => {
+        const next = { ...previous };
+        for (const [key, value] of Object.entries(result.data.extractedFields)) {
+          if (!next[key]?.trim()) next[key] = value;
+        }
+        return next;
+      });
+      saveDraft({ ...draft, triage: result.data, mode: result.mode });
+    } catch {
+      setRetryError(true);
+    } finally {
+      setRetrying(false);
+    }
   }
 
   function buildAttachments(): Attachment[] {
@@ -199,9 +229,14 @@ export function ReviewClient() {
               {draft?.mode !== "fallback" ? dict.intake.modeAi : dict.intake.modeFallback}
             </p>
             {draft?.mode === "fallback" && (
-              <p className="mt-2 rounded-control bg-sunken px-3 py-2 text-xs text-ink-secondary">
-                {dict.intake.fallbackNotice}
-              </p>
+              <div className="mt-2 rounded-control bg-sunken px-3 py-2 text-xs text-ink-secondary">
+                <p>{dict.intake.fallbackNotice}</p>
+                <button type="button" onClick={() => void retryAnalysis()} disabled={retrying} className="mt-2 min-h-10 rounded-control border border-line bg-surface px-3 font-semibold text-accent disabled:opacity-50">
+                  {retrying ? (locale === "hi" ? "फिर कोशिश हो रही है…" : locale === "te" ? "మళ్లీ ప్రయత్నిస్తున్నాం…" : "Trying again…") : (locale === "hi" ? "Gemini से फिर जाँचें" : locale === "te" ? "Geminiతో మళ్లీ పరిశీలించండి" : "Retry with Gemini")}
+                </button>
+                <p className="mt-1">{locale === "hi" ? "विवरण Google Gemini को दोबारा भेजा जाएगा। आपके बदलाव बने रहेंगे।" : locale === "te" ? "వివరణ మళ్లీ Google Geminiకి పంపబడుతుంది. మీ మార్పులు అలాగే ఉంటాయి." : "Sends the description to Google Gemini again. Your edits stay in place."}</p>
+                {retryError && <p role="status" className="mt-1 text-bad">{locale === "hi" ? "AI अभी उपलब्ध नहीं है या विवरण की जाँच ज़रूरी है। बाद में फिर कोशिश करें।" : locale === "te" ? "AI అందుబాటులో లేదు లేదా వివరణను పరిశీలించాలి. తర్వాత మళ్లీ ప్రయత్నించండి." : "AI is unavailable or the description needs checking. Please try again later."}</p>}
+              </div>
             )}
             <dl className="mt-4 space-y-3 text-sm">
               <div>
