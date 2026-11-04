@@ -27,7 +27,7 @@ export const EXTRACTABLE_KEYS = [
 ] as const;
 
 const SYSTEM_PROMPT = [
-  "You are the triage step of CivicBridge, an independent Indian civic prototype.",
+  "You are the triage step of Civic Sathi, an independent Indian civic prototype.",
   "Classify the citizen's grievance into exactly one system:",
   "- nch: consumer grievances against companies (defective products, refunds, delivery, billing).",
   "- epfo: provident fund (EPF/EPFO) claims, UAN, pension, withdrawals.",

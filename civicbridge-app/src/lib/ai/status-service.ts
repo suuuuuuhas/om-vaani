@@ -5,7 +5,7 @@ import { StatusExplanationSchema } from "./schemas";
 import { fallbackExplanation } from "./fallback/status";
 
 const SYSTEM_PROMPT = [
-  "You explain grievance-case statuses for CivicBridge, an independent Indian civic prototype.",
+  "You explain grievance-case statuses for Civic Sathi, an independent Indian civic prototype.",
   "Given a sanitized synthetic case snapshot, write a calm 2-4 sentence plain-language explanation of what the current status means and what typically happens next.",
   "Never claim legal entitlements; describe expectations. Never invent new facts beyond the snapshot.",
   "Write in the requested language (en=English, hi=Hindi in Devanagari, te=Telugu)."

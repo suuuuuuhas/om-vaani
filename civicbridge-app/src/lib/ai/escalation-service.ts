@@ -11,7 +11,7 @@ export interface EscalationDraftInput extends LocalLetterInput {
 }
 
 const SYSTEM_PROMPT = [
-  "You draft polite, factual escalation letters for CivicBridge, an independent Indian civic prototype.",
+  "You draft polite, factual escalation letters for Civic Sathi, an independent Indian civic prototype.",
   "Use only the sanitized synthetic case snapshot provided. Structure: recipient line, subject line, greeting, short context paragraph, a bulleted detail list, one clear request sentence, and a signature placeholder.",
   "Tone is respectful and firm; no legal threats, no invented facts, no claims of automatic entitlement.",
   "Keep the body under 400 words. Write in the requested language (en=English, hi=Hindi in Devanagari, te=Telugu).",

@@ -36,9 +36,9 @@ const GREETING: Record<string, string> = {
 };
 
 const SIGNOFF: Record<string, string> = {
-  en: "Sincerely,\n(Your name)\n\nPrepared with CivicBridge - an independent hackathon prototype. Details above are self-reported; reference data in this prototype is synthetic.",
-  hi: "सादर,\n(आपका नाम)\n\nCivicBridge - एक स्वतंत्र हैकाथॉन प्रोटोटाइप - द्वारा तैयार। ऊपर दिए विवरण स्वयं-घोषित हैं; इस प्रोटोटाइप का संदर्भ डेटा काल्पनिक है।",
-  te: "వినమ్రం,\n(మీ పేరు)\n\nCivicBridge - ఒక స్వతంత్ర హ్యాకథాన్ ప్రోటోటైప్ - ద్వారా సిద్ధం. పై వివరాలు స్వయం-ప్రకటితం; ఈ ప్రోటోటైప్ రిఫరెన్స్ డేటా కల్పితం."
+  en: "Sincerely,\n(Your name)\n\nPrepared with Civic Sathi - an independent hackathon prototype. Details above are self-reported; reference data in this prototype is synthetic.",
+  hi: "सादर,\n(आपका नाम)\n\nCivic Sathi - एक स्वतंत्र हैकाथॉन प्रोटोटाइप - द्वारा तैयार। ऊपर दिए विवरण स्वयं-घोषित हैं; इस प्रोटोटाइप का संदर्भ डेटा काल्पनिक है।",
+  te: "వినమ్రం,\n(మీ పేరు)\n\nCivic Sathi - ఒక స్వతంత్ర హ్యాకథాన్ ప్రోటోటైప్ - ద్వారా సిద్ధం. పై వివరాలు స్వయం-ప్రకటితం; ఈ ప్రోటోటైప్ రిఫరెన్స్ డేటా కల్పితం."
 };
 
 export function localSubject(snapshot: CaseSnapshot): string {
