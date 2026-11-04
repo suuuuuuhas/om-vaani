@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useApp } from "@/components/providers/app-provider";
+import { wavBlob } from "@/lib/voice/wav";
 
 const greetings = {
   en: "Hello, I am Vaani Saty. Tell me what happened, and I will help you prepare your case.",
@@ -16,38 +17,25 @@ const copy = {
   te: { guide: "మీ వాయిస్ సహాయకురాలు · Gnani ద్వారా", consent: "నా వాయిస్ మరియు మాట్లాడే సమాధానాన్ని ప్రాసెసింగ్ కోసం Gnaniకి పంపడానికి అంగీకరిస్తున్నాను. పాస్‌వర్డ్‌లు, OTPలు, బ్యాంకు వివరాలు చెప్పవద్దు.", required: "దయచేసి ముందుగా వాయిస్ ప్రాసెసింగ్‌కు అంగీకరించండి.", processing: "మీ రికార్డింగ్‌ను వింటున్నాం…", detected: "భాష గుర్తించబడింది. దయచేసి కింద ఉన్న వచనాన్ని పరిశీలించండి.", other: "వచనాన్ని పరిశీలించండి. ఇంటర్‌ఫేస్ ఇంగ్లీష్, హిందీ, తెలుగులో ఉంది; వాణి గుర్తించిన భాషలో సమాధానమివ్వడానికి ప్రయత్నిస్తుంది.", recording: "రికార్డింగ్ జరుగుతోంది… సిద్ధమైనప్పుడు ఆపండి; గరిష్ఠంగా 27 సెకన్లు.", microphone: "మైక్రోఫోన్ అందుబాటులో లేదు. మీరు సందేశాన్ని టైప్ చేయవచ్చు.", failed: "రికార్డింగ్ విఫలమైంది. మళ్లీ ప్రయత్నించండి.", playback: "వాయిస్ అందుబాటులో లేదు. మళ్లీ ప్రయత్నించండి.", speak: "వాణితో మాట్లాడండి", stop: "ఆపి వచనంగా మార్చండి", listen: "వాణిని వినండి", hint: "మీ భాషలో మాట్లాడండి; వాణి దాన్ని గుర్తించడానికి ప్రయత్నిస్తుంది." }
 } as const;
 
-function wavBlob(chunks: Float32Array[], sampleRate: number): Blob {
-  const inputCount = chunks.reduce((n, part) => n + part.length, 0);
-  const input = new Float32Array(inputCount); let cursor = 0;
-  for (const part of chunks) { input.set(part, cursor); cursor += part.length; }
-  const outputRate = 16000, count = Math.floor(inputCount * outputRate / sampleRate);
-  const buffer = new ArrayBuffer(44 + count * 2), view = new DataView(buffer);
-  const label = (offset: number, text: string) => { for (let i = 0; i < text.length; i++) view.setUint8(offset + i, text.charCodeAt(i)); };
-  label(0, "RIFF"); view.setUint32(4, 36 + count * 2, true); label(8, "WAVE"); label(12, "fmt ");
-  view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true);
-  view.setUint32(24, outputRate, true); view.setUint32(28, outputRate * 2, true);
-  view.setUint16(32, 2, true); view.setUint16(34, 16, true); label(36, "data"); view.setUint32(40, count * 2, true);
-  for (let i = 0; i < count; i++) {
-    const first = Math.floor(i * sampleRate / outputRate), end = Math.max(first + 1, Math.floor((i + 1) * sampleRate / outputRate));
-    let total = 0; for (let n = first; n < end; n++) total += input[n] || 0;
-    const s = Math.max(-1, Math.min(1, total / (end - first))); view.setInt16(44 + i * 2, s < 0 ? s * 32768 : s * 32767, true);
-  }
-  return new Blob([buffer], { type: "audio/wav" });
-}
 
 export function VaaniSaty({ onTranscript, disabled = false }: { onTranscript: (text: string, language: string | null) => void; disabled?: boolean }) {
   const { locale, setLocale } = useApp();
   const words = copy[locale];
   const [consent, setConsent] = useState(false);
-  const [state, setState] = useState<"idle" | "recording" | "processing" | "speaking">("idle");
+  const [state, setState] = useState<"idle" | "requesting" | "recording" | "processing" | "speaking">("idle");
   const [message, setMessage] = useState("");
   const capture = useRef<{ context: AudioContext; stream: MediaStream; processor: ScriptProcessorNode; chunks: Float32Array[]; timer: ReturnType<typeof setTimeout> } | null>(null);
   const audioUrl = useRef<string | null>(null);
+  const mounted = useRef(false);
 
-  useEffect(() => () => {
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+    mounted.current = false;
     const active = capture.current;
     if (active) { clearTimeout(active.timer); active.processor.disconnect(); active.stream.getTracks().forEach(t => t.stop()); void active.context.close(); }
     if (audioUrl.current) URL.revokeObjectURL(audioUrl.current);
+    };
   }, []);
 
   async function stop() {
@@ -70,18 +58,22 @@ export function VaaniSaty({ onTranscript, disabled = false }: { onTranscript: (t
 
   async function record() {
     if (!consent) { setMessage(words.required); return; }
+    setState("requesting");
     let stream: MediaStream | undefined;
     let context: AudioContext | undefined;
     try {
       stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (!mounted.current) { stream.getTracks().forEach(track => track.stop()); return; }
       context = new AudioContext(); const source = context.createMediaStreamSource(stream);
       const processor = context.createScriptProcessor(4096, 1, 1); const chunks: Float32Array[] = [];
       processor.onaudioprocess = event => chunks.push(new Float32Array(event.inputBuffer.getChannelData(0)));
-      source.connect(processor); processor.connect(context.destination);
+      // Keep the processing graph active without feeding the microphone to speakers.
+      const mute = context.createGain(); mute.gain.value = 0;
+      source.connect(processor); processor.connect(mute); mute.connect(context.destination);
       const timer = setTimeout(() => void stop(), 27000);
       capture.current = { context, stream, processor, chunks, timer };
       setState("recording"); setMessage(words.recording);
-    } catch { stream?.getTracks().forEach(track => track.stop()); if (context) void context.close(); setMessage(words.microphone); }
+    } catch { stream?.getTracks().forEach(track => track.stop()); if (context) void context.close(); setMessage(words.microphone); setState("idle"); }
   }
 
   async function speak() {

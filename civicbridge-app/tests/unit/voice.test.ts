@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { POST as transcribe } from "@/app/api/voice/transcribe/route";
 import { POST as speak } from "@/app/api/voice/speak/route";
 import { generateJson } from "@/lib/ai/client";
+import { wavBlob } from "@/lib/voice/wav";
 
 afterEach(() => { vi.unstubAllEnvs(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
@@ -60,5 +61,24 @@ describe("Gemini resilience", () => {
     const result = await generateJson({ schemaName: "test", jsonSchema: { type: "object" }, systemPrompt: "Test.", userPayload: "Synthetic." });
     expect(result).toEqual({ answer: "ok" });
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+});
+
+
+describe("microphone audio encoding", () => {
+  it("encodes 48 kHz capture as mono 16 kHz PCM WAV with the correct length", async () => {
+    const samples = new Float32Array(48000).fill(0.5);
+    const blob = wavBlob([samples.subarray(0, 24000), samples.subarray(24000)], 48000);
+    const bytes = await blob.arrayBuffer();
+    const view = new DataView(bytes);
+    expect(blob.type).toBe("audio/wav");
+    expect(new TextDecoder().decode(bytes.slice(0, 4))).toBe("RIFF");
+    expect(new TextDecoder().decode(bytes.slice(8, 12))).toBe("WAVE");
+    expect(view.getUint16(22, true)).toBe(1);
+    expect(view.getUint32(24, true)).toBe(16000);
+    expect(view.getUint16(34, true)).toBe(16);
+    expect(view.getUint32(40, true)).toBe(32000);
+    expect(bytes.byteLength).toBe(32044);
+    expect(view.getInt16(44, true)).toBeCloseTo(16383, 0);
   });
 });
