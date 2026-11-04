@@ -29,6 +29,14 @@ describe("Gnani voice endpoints", () => {
     expect(response.status).toBe(422);
   });
 
+  it("does not pass an unsupported detected language to downstream services", async () => {
+    vi.stubEnv("GNANI_STT_API_KEY", "test-stt-key");
+    vi.stubGlobal("fetch", vi.fn(async () => Response.json({ success: true, transcript: "hello", detected_language_code: "unknown" })));
+    const form = new FormData(); form.append("audio", new File([new Uint8Array(200)], "voice.wav", { type: "audio/wav" }));
+    const response = await transcribe(new Request("http://localhost/api/voice/transcribe", { method: "POST", body: form }));
+    expect(await response.json()).toEqual({ transcript: "hello", language: null });
+  });
+
   it("returns playable audio without exposing the provider key", async () => {
     vi.stubEnv("GNANI_TTS_API_KEY", "test-tts-key");
     vi.stubGlobal("fetch", vi.fn(async (_url: string, init: RequestInit) => {

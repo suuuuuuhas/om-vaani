@@ -3,6 +3,7 @@ import { allowRequest } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
+const supportedLanguages = new Set(["en-IN", "hi-IN", "te-IN", "ta-IN", "kn-IN", "ml-IN", "mr-IN", "bn-IN", "gu-IN", "pa-IN"]);
 
 export async function POST(request: Request) {
   if (!await allowRequest(request, "transcribe", 12)) return NextResponse.json({ error: "Too many requests or service temporarily unavailable." }, { status: 429 });
@@ -27,6 +28,6 @@ export async function POST(request: Request) {
     if (!data.success || typeof data.transcript !== "string" || !data.transcript.trim() || data.truncated) {
       return NextResponse.json({ error: "We could not recognise the complete recording. Try a shorter note." }, { status: 422 });
     }
-    return NextResponse.json({ transcript: data.transcript.slice(0, 4000), language: data.detected_language_code ?? null });
+    return NextResponse.json({ transcript: data.transcript.slice(0, 4000), language: supportedLanguages.has(data.detected_language_code) ? data.detected_language_code : null });
   } catch { return NextResponse.json({ error: "Voice recognition failed. Try again or type your message." }, { status: 502 }); }
 }

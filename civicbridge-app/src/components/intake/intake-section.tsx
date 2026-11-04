@@ -100,8 +100,8 @@ export function IntakeSection() {
   }
 
   return (
-    <section className="grid gap-10 pt-4 lg:grid-cols-[1.1fr_1fr] lg:gap-14">
-      <div className="max-w-xl">
+    <section className="intake-layout grid gap-10 pt-4 lg:grid-cols-[1.1fr_1fr] lg:gap-14">
+      <div className="intake-intro max-w-xl">
         <p className="mb-3 inline-flex items-center gap-2 rounded-control bg-accent-soft px-3 py-1.5 text-xs font-semibold text-accent-strong">
           <UserCircle aria-hidden className="size-4" weight="fill" />
           {(dict.demo.activeAs ?? "").replace(
