@@ -63,16 +63,18 @@ export function VaaniSaty({ onTranscript }: { onTranscript: (text: string, langu
 
   async function record() {
     if (!consent) { setMessage("Please agree to voice processing first."); return; }
+    let stream: MediaStream | undefined;
+    let context: AudioContext | undefined;
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const context = new AudioContext(); const source = context.createMediaStreamSource(stream);
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      context = new AudioContext(); const source = context.createMediaStreamSource(stream);
       const processor = context.createScriptProcessor(4096, 1, 1); const chunks: Float32Array[] = [];
       processor.onaudioprocess = event => chunks.push(new Float32Array(event.inputBuffer.getChannelData(0)));
       source.connect(processor); processor.connect(context.destination);
       const timer = setTimeout(() => void stop(), 27000);
       capture.current = { context, stream, processor, chunks, timer };
       setState("recording"); setMessage("Recording… Stop when you are ready; maximum 27 seconds.");
-    } catch { setMessage("Microphone access is unavailable. You can type your message."); }
+    } catch { stream?.getTracks().forEach(track => track.stop()); if (context) void context.close(); setMessage("Microphone access is unavailable. You can type your message."); }
   }
 
   async function speak() {
