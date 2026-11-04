@@ -30,6 +30,14 @@ describe("Gnani voice endpoints", () => {
     expect(response.status).toBe(422);
   });
 
+  it("rejects transcripts that exceed the text limit rather than cutting them off", async () => {
+    vi.stubEnv("GNANI_STT_API_KEY", "test-stt-key");
+    vi.stubGlobal("fetch", vi.fn(async () => Response.json({ success: true, transcript: "a".repeat(4001), detected_language_code: "en-IN" })));
+    const form = new FormData(); form.append("audio", new File([new Uint8Array(200)], "voice.wav", { type: "audio/wav" }));
+    const response = await transcribe(new Request("http://localhost/api/voice/transcribe", { method: "POST", body: form }));
+    expect(response.status).toBe(422);
+  });
+
   it("does not pass an unsupported detected language to downstream services", async () => {
     vi.stubEnv("GNANI_STT_API_KEY", "test-stt-key");
     vi.stubGlobal("fetch", vi.fn(async () => Response.json({ success: true, transcript: "hello", detected_language_code: "unknown" })));

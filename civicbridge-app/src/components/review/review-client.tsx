@@ -50,7 +50,7 @@ export function ReviewClient() {
   const [retrying, setRetrying] = useState(false);
   const [retryError, setRetryError] = useState(false);
   const [followupLanguage, setFollowupLanguage] = useState<string | undefined>();
-  const [followupTooLong, setFollowupTooLong] = useState(false);
+  const [extraFollowup, setExtraFollowup] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const draft = store?.draft ?? null;
@@ -388,13 +388,13 @@ export function ReviewClient() {
           <p className="mt-1 text-sm text-ink-secondary">{locale === "hi" ? "वाणी को बाकी जानकारी बताएँ, फिर नीचे लिखे विवरण की जाँच करें।" : locale === "te" ? "మిగిలిన వివరాలను వాణికి చెప్పి, కింద ఉన్న వచనాన్ని పరిశీలించండి." : "Tell Vaani anything you missed, then review the text below."}</p>
           <VaaniSaty disabled={retrying} onTranscript={(transcript, language) => {
             const combined = [originalText.trim(), transcript].filter(Boolean).join(" ");
-            if (combined.length > 4000) { setFollowupTooLong(true); return; }
-            setFollowupTooLong(false);
+            if (combined.length > 4000) { setExtraFollowup(transcript); return; }
+            setExtraFollowup("");
             setFollowupLanguage(language ?? undefined);
             setOriginalText(combined);
             setRetryError(false);
           }} />
-          {followupTooLong && <p role="alert" className="mt-2 text-xs text-bad">{locale === "hi" ? "विवरण बहुत लंबा है। फिर बोलने से पहले कुछ पाठ हटाएँ।" : locale === "te" ? "వివరణ చాలా పొడవుగా ఉంది. మళ్లీ మాట్లాడే ముందు కొంత వచనం తొలగించండి." : "The description is too long. Remove some text before recording again."}</p>}
+          {extraFollowup && <div role="alert" className="mt-2 text-xs text-bad"><p>{locale === "hi" ? "विवरण बहुत लंबा है। इस पाठ से ज़रूरी हिस्सा कॉपी करें और विवरण छोटा करें।" : locale === "te" ? "వివరణ చాలా పొడవుగా ఉంది. అవసరమైన వచనాన్ని కాపీ చేసి వివరణను కుదించండి." : "The description is too long. Copy the relevant part of this transcript and shorten the description."}</p><textarea aria-label={locale === "hi" ? "अतिरिक्त रिकॉर्डिंग का पाठ" : locale === "te" ? "అదనపు రికార్డింగ్ వచనం" : "Additional recording transcript"} readOnly value={extraFollowup} rows={4} className="mt-2 w-full rounded-control border border-line bg-background p-2" /></div>}
           <label htmlFor="voice-followup-text" className="mt-4 block text-sm font-semibold">{locale === "hi" ? "पूरा विवरण जाँचें और सुधारें" : locale === "te" ? "పూర్తి వివరణను పరిశీలించి సవరించండి" : "Review and correct the full description"}</label>
           <textarea id="voice-followup-text" disabled={retrying} value={originalText} onChange={event => setOriginalText(event.target.value.slice(0, 4000))} maxLength={4000} rows={5} className="mt-2 w-full resize-y rounded-control border border-line bg-background px-3 py-2 text-sm" />
           <button type="button" onClick={() => void retryAnalysis()} disabled={retrying} className="mt-3 min-h-11 rounded-control border border-line px-4 text-sm font-semibold text-accent disabled:opacity-50">{retrying ? (locale === "hi" ? "जाँच हो रही है…" : locale === "te" ? "పరిశీలిస్తున్నాం…" : "Checking…") : (locale === "hi" ? "विवरण से फिर जाँचें" : locale === "te" ? "వివరణతో మళ్లీ పరిశీలించండి" : "Update analysis")}</button>

@@ -28,6 +28,7 @@ export async function POST(request: Request) {
     if (!data.success || typeof data.transcript !== "string" || !data.transcript.trim() || data.truncated) {
       return NextResponse.json({ error: "We could not recognise the complete recording. Try a shorter note." }, { status: 422 });
     }
-    return NextResponse.json({ transcript: data.transcript.slice(0, 4000), language: supportedLanguages.has(data.detected_language_code) ? data.detected_language_code : null });
+    if (data.transcript.length > 4000) return NextResponse.json({ error: "The recording was too long to transcribe safely. Please record a shorter note." }, { status: 422 });
+    return NextResponse.json({ transcript: data.transcript, language: supportedLanguages.has(data.detected_language_code) ? data.detected_language_code : null });
   } catch { return NextResponse.json({ error: "Voice recognition failed. Try again or type your message." }, { status: 502 }); }
 }

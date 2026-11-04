@@ -27,6 +27,7 @@ export function IntakeSection() {
   const [aiConsent, setAiConsent] = useState(false);
   const [consentError, setConsentError] = useState(false);
   const [voiceLanguage, setVoiceLanguage] = useState<string | undefined>();
+  const [extraTranscript, setExtraTranscript] = useState("");
   const [status, setStatus] = useState<
     "idle" | "loading" | "blocked" | "error"
   >("idle");
@@ -130,7 +131,15 @@ export function IntakeSection() {
       </div>
 
       <form onSubmit={handleSubmit} noValidate className="min-w-0">
-        <VaaniSaty onTranscript={(transcript, language) => { setVoiceLanguage(language ?? undefined); setText((previous) => [previous.trim(), transcript].filter(Boolean).join(" ").slice(0, MAX_CHARS)); }} />
+        <VaaniSaty onTranscript={(transcript, language) => {
+          const combined = [text.trim(), transcript].filter(Boolean).join(" ");
+          if (combined.length > MAX_CHARS) { setExtraTranscript(transcript); return; }
+          setExtraTranscript(""); setVoiceLanguage(language ?? undefined); setText(combined);
+        }} />
+        {extraTranscript && <div role="alert" className="mt-3 rounded-control border border-warn/40 bg-warn/10 p-3 text-sm">
+          <p>{locale === "hi" ? "पूरा विवरण बहुत लंबा है। नीचे की रिकॉर्डिंग से ज़रूरी पाठ कॉपी करके ऊपर का विवरण छोटा करें।" : locale === "te" ? "పూర్తి వివరణ చాలా పొడవుగా ఉంది. కింది వచనంలో అవసరమైనది కాపీ చేసి వివరణను కుదించండి." : "The full description is too long. Copy the relevant part of this transcript and shorten the description."}</p>
+          <textarea aria-label={locale === "hi" ? "अतिरिक्त रिकॉर्डिंग का पाठ" : locale === "te" ? "అదనపు రికార్డింగ్ వచనం" : "Additional recording transcript"} readOnly value={extraTranscript} rows={4} className="mt-2 w-full rounded-control border border-line bg-surface p-2" />
+        </div>}
         <div className="rounded-card border border-line bg-surface p-5 shadow-sm md:p-6">
           <label className="mb-4 flex items-start gap-2 text-xs leading-relaxed"><input type="checkbox" checked={aiConsent} onChange={e => setAiConsent(e.target.checked)} className="mt-0.5" /><span>{locale === "hi" ? "मैं AI विश्लेषण के लिए अपना लिखित विवरण Google Gemini को भेजने की सहमति देता/देती हूँ। मेरा ड्राफ्ट इसी ब्राउज़र में रहता है।" : locale === "te" ? "AI విశ్లేషణ కోసం నా వ్రాత వివరణను Google Geminiకి పంపడానికి అంగీకరిస్తున్నాను. నా డ్రాఫ్ట్ ఈ బ్రౌజర్‌లో ఉంటుంది." : "I agree to send my written description to Google Gemini for AI analysis. My draft stays in this browser."}</span></label>
           {consentError && !aiConsent && <p role="alert" className="mb-3 text-xs text-bad">{locale === "hi" ? "आगे बढ़ने से पहले AI प्रोसेसिंग के लिए सहमति दें।" : locale === "te" ? "కొనసాగడానికి ముందు AI ప్రాసెసింగ్‌కు అంగీకరించండి." : "Please agree to AI processing before continuing."}</p>}
