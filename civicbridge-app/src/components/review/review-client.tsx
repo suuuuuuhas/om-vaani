@@ -411,6 +411,9 @@ export function ReviewClient() {
           </p>
         )}
 
+        <p className="rounded-control border border-warn/40 bg-warn/10 p-3 text-sm" role="note">
+          {locale === "hi" ? "यह केवल इस ब्राउज़र में सहेजता है। किसी विभाग में शिकायत दर्ज नहीं होगी; संदर्भ और स्थिति काल्पनिक हैं।" : locale === "te" ? "ఇది ఈ బ్రౌజర్‌లో మాత్రమే సేవ్ అవుతుంది. ఏ శాఖకూ ఫిర్యాదు నమోదు కాదు; రిఫరెన్స్, స్థితి కల్పితం." : "This only saves the case in this browser. It does not file a grievance with any authority; references and statuses are simulated."}
+        </p>
         <button
           type="submit"
           disabled={submitting || !system}

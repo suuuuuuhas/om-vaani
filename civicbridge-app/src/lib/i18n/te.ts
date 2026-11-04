@@ -54,7 +54,7 @@ export const te: Dictionary = {
     privacyCvv: "కార్డు CVVలు",
     privacyBank: "బ్యాంక్ లాగిన్ వివరాలు",
     submit: "నా ఫిర్యాదు వ్యవస్థను గుర్తించండి",
-    submitting: "సమర్పిస్తోంది…",
+    submitting: "మీ వివరణను పరిశీలిస్తున్నాం…",
     charCount: "{n} / 4000 అక్షరాలు",
     aiLoading: "మీ వివరణ చదువుతోంది…",
     aiErrorTitle: "AI సేవ స్పందించలేదు",
@@ -74,7 +74,7 @@ export const te: Dictionary = {
     low: "తక్కువ నమ్మకం - దయచేసి తనిఖీ చేయండి"
   },
   review: {
-    title: "సమర్పించే ముందు సమీక్షించండి",
+    title: "సేవ్ చేయడానికి ముందు సమీక్షించండి",
     missingDraftTitle: "సమీక్షించడానికి ఏమీ లేదు",
     missingDraftBody: "మొదటి పేజీలో మీ ఫిర్యాదును రాయడంతో ప్రారంభించండి.",
     backHome: "ఫిర్యాదు రాయండి",
@@ -100,8 +100,8 @@ export const te: Dictionary = {
     screenshotName: "sample-confirmation.png",
     originalHeading: "మీ అసలు వివరణ",
     originalEditLabel: "వివరణను సవరించండి",
-    submit: "కేసు సమర్పించండి",
-    submitting: "సమర్పిస్తోంది…",
+    submit: "ఈ బ్రౌజర్‌లో సేవ్ చేయండి",
+    submitting: "సేవ్ చేస్తోంది…",
     submitError: "కేసును సేవ్ చేయలేకపోయాం. దయచేసి మళ్లీ ప్రయత్నించండి."
   },
   fields: {
@@ -132,7 +132,7 @@ export const te: Dictionary = {
     subtitle: "కేసులు ఈ బ్రౌజర్‌లో ఉంటాయి. వాయిస్ మరియు AI సదుపాయాలు సమాచారాన్ని తమ సేవల ప్రదాతలకు పంపుతాయి.",
     emptyTitle: "ఇంకా కేసులు లేవు",
     emptyBody:
-      "ఫిర్యాదు సమర్పించినప్పుడు అది స్థితి, తర్వాతి మెట్టుతో ఇక్కడ కనిపిస్తుంది.",
+      "సేవ్ చేసిన కేసులు ఇక్కడ కనిపిస్తాయి. స్థితి, రిఫరెన్స్‌లు కల్పితం; ఫిర్యాదు నమోదు కాదు.",
     emptyCta: "కొత్త ఫిర్యాదు ప్రారంభించండి",
     colCase: "కేసు",
     colSystem: "వ్యవస్థ",
@@ -152,7 +152,7 @@ export const te: Dictionary = {
     overdueTag: "గడువు దాటింది"
   },
   status: {
-    submitted: "ఇప్పుడే సమర్పించబడింది",
+    submitted: "స్థానికంగా సేవ్ చేయబడింది",
     in_progress: "పురోగతిలో ఉంది",
     awaiting_response: "స్పందన కోసం వేచి ఉంది",
     response_received: "స్పందన వచ్చింది",
@@ -160,7 +160,7 @@ export const te: Dictionary = {
   },
   timeline: {
     heading: "కాలక్రమం",
-    submitted: "{system} ద్వారా కేసు సిద్ధం చేసి సమర్పించబడింది",
+    submitted: "{system} కోసం కేసు స్థానికంగా సేవ్ చేయబడింది; ఫిర్యాదు నమోదు కాలేదు",
     acknowledged: "{system} అంగీకరించింది",
     in_progress: "{system} పురోగతిలో ఉన్నట్టు గుర్తించింది",
     response_received: "{system} నుండి స్పందన వచ్చింది",
@@ -236,7 +236,7 @@ export const te: Dictionary = {
     urgencyMedium: "మధ్యస్థ అత్యవసరత",
     urgencyHigh: "ఎక్కువ అత్యవసరత",
     syntheticNote:
-      "కల్పిత ప్రదర్శన కేసు. రిఫరెన్స్ నంబర్లు, స్పందనలు ఊహించినవే."
+      "ప్రోటోటైప్ కేసు. ఫిర్యాదు నమోదు కాలేదు. రిఫరెన్స్‌లు, స్థితి, స్పందనలు కల్పితం."
   },
   privacyMessages: {
     aadhaar: "ఇది ఆధార్ నంబర్ లాగా ఉంది",

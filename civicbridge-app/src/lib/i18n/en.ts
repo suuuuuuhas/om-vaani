@@ -77,7 +77,7 @@ export const en = {
     low: "Low confidence - please check"
   },
   review: {
-    title: "Review before submitting",
+    title: "Review before saving",
     missingDraftTitle: "Nothing to review yet",
     missingDraftBody: "Start by describing your grievance on the first page.",
     backHome: "Describe a grievance",
@@ -103,8 +103,8 @@ export const en = {
     screenshotName: "sample-confirmation.png",
     originalHeading: "Your original description",
     originalEditLabel: "Edit description",
-    submit: "Submit case",
-    submitting: "Submitting…",
+    submit: "Save on this browser",
+    submitting: "Saving…",
     submitError: "Could not save the case locally. Please try again."
   },
   fields: {
@@ -135,7 +135,7 @@ export const en = {
     subtitle: "Cases are stored in this browser. AI and voice features send information to their providers.",
     emptyTitle: "No cases yet",
     emptyBody:
-      "When you submit a grievance it will appear here with its status and next step.",
+      "Saved cases appear here. Statuses and references are simulated; no grievance is filed.",
     emptyCta: "Start a new grievance",
     colCase: "Case",
     colSystem: "System",
@@ -155,7 +155,7 @@ export const en = {
     overdueTag: "Overdue"
   },
   status: {
-    submitted: "Just submitted",
+    submitted: "Saved locally",
     in_progress: "In progress",
     awaiting_response: "Waiting for a response",
     response_received: "Response received",
@@ -163,7 +163,7 @@ export const en = {
   },
   timeline: {
     heading: "Timeline",
-    submitted: "Case prepared and submitted through {system}",
+    submitted: "Case saved locally for {system}; not submitted",
     acknowledged: "Acknowledged by {system}",
     in_progress: "Marked in progress by {system}",
     response_received: "Response received from {system}",
@@ -239,7 +239,7 @@ export const en = {
     urgencyMedium: "Medium urgency",
     urgencyHigh: "High urgency",
     syntheticNote:
-      "Synthetic demonstration case. Reference numbers and responses are invented."
+      "Prototype case. No grievance has been filed. References, statuses and responses are simulated."
   },
   privacyMessages: {
     aadhaar: "Looks like an Aadhaar number",

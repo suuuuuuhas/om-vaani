@@ -74,7 +74,7 @@ export const hi: Dictionary = {
     low: "कम विश्वास - कृपया जाँचें"
   },
   review: {
-    title: "जमा करने से पहले समीक्षा करें",
+    title: "सहेजने से पहले समीक्षा करें",
     missingDraftTitle: "समीक्षा के लिए कुछ नहीं है",
     missingDraftBody: "पहले पेज पर अपनी शिकायत लिखकर शुरुआत करें।",
     backHome: "शिकायत लिखें",
@@ -100,8 +100,8 @@ export const hi: Dictionary = {
     screenshotName: "sample-confirmation.png",
     originalHeading: "आपका मूल विवरण",
     originalEditLabel: "विवरण संपादित करें",
-    submit: "मामला जमा करें",
-    submitting: "जमा हो रहा है…",
+    submit: "इस ब्राउज़र में सहेजें",
+    submitting: "सहेजा जा रहा है…",
     submitError: "मामला सहेजा नहीं जा सका। कृपया फिर कोशिश करें।"
   },
   fields: {
@@ -132,7 +132,7 @@ export const hi: Dictionary = {
     subtitle: "मामले इसी ब्राउज़र में रहते हैं। आवाज़ और AI सुविधाएँ जानकारी अपने सेवा प्रदाताओं को भेजती हैं।",
     emptyTitle: "अभी कोई मामला नहीं",
     emptyBody:
-      "शिकायत जमा करने पर वह यहाँ स्थिति और अगले कदम के साथ दिखेगी।",
+      "सहेजे गए मामले यहाँ दिखेंगे। स्थिति और संदर्भ काल्पनिक हैं; शिकायत दर्ज नहीं होती।",
     emptyCta: "नई शिकायत शुरू करें",
     colCase: "मामला",
     colSystem: "प्रणाली",
@@ -152,7 +152,7 @@ export const hi: Dictionary = {
     overdueTag: "समय से आगे"
   },
   status: {
-    submitted: "अभी जमा हुआ",
+    submitted: "स्थानीय रूप से सहेजा गया",
     in_progress: "प्रगति पर",
     awaiting_response: "जवाब की प्रतीक्षा में",
     response_received: "जवाब मिला",
@@ -160,7 +160,7 @@ export const hi: Dictionary = {
   },
   timeline: {
     heading: "समयरेखा",
-    submitted: "{system} के माध्यम से मामला तैयार और जमा हुआ",
+    submitted: "{system} के लिए मामला स्थानीय रूप से सहेजा गया; दर्ज नहीं हुआ",
     acknowledged: "{system} ने पावती दी",
     in_progress: "{system} ने प्रगति पर चिह्नित किया",
     response_received: "{system} से जवाब मिला",
@@ -236,7 +236,7 @@ export const hi: Dictionary = {
     urgencyMedium: "मध्यम तात्कालिकता",
     urgencyHigh: "अधिक तात्कालिकता",
     syntheticNote:
-      "काल्पनिक प्रदर्शन मामला। संदर्भ नंबर और जवाब गढ़े गए हैं।"
+      "प्रोटोटाइप मामला। कोई शिकायत दर्ज नहीं हुई है। संदर्भ, स्थिति और जवाब काल्पनिक हैं।"
   },
   privacyMessages: {
     aadhaar: "यह आधार नंबर जैसा लगता है",
