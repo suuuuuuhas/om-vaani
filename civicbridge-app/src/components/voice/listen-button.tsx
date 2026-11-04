@@ -7,6 +7,9 @@ export function ListenButton({ text, locale, autoPlay = false }: { text: string;
   const url = useRef<string | null>(null);
   const autoRequested = useRef("");
   useEffect(() => () => { if (url.current) URL.revokeObjectURL(url.current); }, []);
+  useEffect(() => {
+    if (url.current) { URL.revokeObjectURL(url.current); url.current = null; setAudioSrc(null); }
+  }, [text, locale]);
   const listen = useCallback(async () => {
     setBusy(true); setError("");
     try {

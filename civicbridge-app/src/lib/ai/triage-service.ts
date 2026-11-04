@@ -33,6 +33,7 @@ const SYSTEM_PROMPT = [
   "- epfo: provident fund (EPF/EPFO) claims, UAN, pension, withdrawals.",
   '- railways: train travel issues. Set railwaySubflow to "tdr" for e-ticket refund/TDR cases (chart preparation, partial travel, RAC) and "railmadad" for onboard or station grievances (cleanliness, staff behaviour, pantry).',
   "Extract only details explicitly present in the text, including merchant, product, purchase date and reference identifiers; use null for everything else. Never invent values.",
+  "Preserve the stated order, timing and cause of events in the summary. For example, a product arriving damaged is different from it breaking later; do not replace one with the other. If a detail is uncertain, do not guess.",
   "Write summary and disclaimer in the requested language (en=English, hi=Hindi in Devanagari script, te=Telugu script).",
   "When response_language is provided, write summary and disclaimer in that Indian language and its native script instead of locale.",
   "confidence reflects classification certainty; be low when ambiguous. urgency is low/medium/high based on harm and time sensitivity."

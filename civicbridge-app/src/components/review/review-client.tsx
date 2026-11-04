@@ -45,6 +45,8 @@ export function ReviewClient() {
   const [subflow, setSubflow] = useState<RailwaySubflow | undefined>(undefined);
   const [fields, setFields] = useState<Fields>({});
   const [originalText, setOriginalText] = useState("");
+  const [editedSummary, setEditedSummary] = useState("");
+  const [summaryEdited, setSummaryEdited] = useState(false);
   const [withReceipt, setWithReceipt] = useState(false);
   const [withScreenshot, setWithScreenshot] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -67,6 +69,8 @@ export function ReviewClient() {
     setSubflow(draft?.reviewSystem ? draft.reviewSubflow : triage.railwaySubflow);
     setFields({ ...triage.extractedFields, ...draft?.reviewFields });
     setOriginalText(draft?.text ?? "");
+    setEditedSummary(triage.summary);
+    setSummaryEdited(false);
   }
 
   const adapter = system ? getAdapter(system) : null;
@@ -102,6 +106,8 @@ export function ReviewClient() {
       }
       const updatedText = originalText.trim();
       setFields(updatedFields);
+      setEditedSummary(result.data.summary);
+      setSummaryEdited(false);
       setInitializedFor(updatedText);
       saveDraft({ ...draft, text: updatedText, voiceLanguage: responseLanguage,
         triage: result.data, mode: result.mode, reviewFields: updatedFields,
@@ -139,6 +145,7 @@ export function ReviewClient() {
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!triage || !system || !adapter || !store || !draft) return;
+    if (!editedSummary.trim()) { setError(locale === "hi" ? "कृपया सारांश भरें।" : locale === "te" ? "దయచేసి సారాంశాన్ని నమోదు చేయండి." : "Please provide a summary."); return; }
     setSubmitting(true);
     setError(null);
 
@@ -157,7 +164,7 @@ export function ReviewClient() {
         locale,
         system,
         railwaySubflow: system === "railways" ? subflow : undefined,
-        triage,
+        triage: { ...triage, summary: editedSummary.trim() },
         fields: Object.fromEntries(
           Object.entries(fields).filter(([, v]) => v && v.trim())
         ),
@@ -251,7 +258,11 @@ export function ReviewClient() {
                 <dt className="text-xs font-semibold uppercase tracking-wide text-ink-secondary">
                   {dict.review.summaryHeading}
                 </dt>
-                <dd className="mt-1 leading-relaxed">{triage.summary}<ListenButton text={triage.summary} locale={draft?.mode === "gemini" ? draft.voiceLanguage ?? locale : locale} autoPlay={Boolean(draft?.voiceLanguage)} /></dd>
+                <dd className="mt-1 leading-relaxed">
+                  <label htmlFor="review-summary" className="text-xs text-ink-secondary">{locale === "hi" ? "सारांश जाँचें और ज़रूरत हो तो सुधारें।" : locale === "te" ? "సారాంశాన్ని పరిశీలించి అవసరమైతే సవరించండి." : "Check the summary and correct any details."}</label>
+                  <textarea id="review-summary" value={editedSummary} onChange={event => { setSummaryEdited(true); setEditedSummary(event.target.value.slice(0, 600)); }} maxLength={600} disabled={retrying} rows={3} className="mt-1 w-full resize-y rounded-control border border-line bg-background px-3 py-2 text-sm" />
+                  <ListenButton text={editedSummary} locale={draft?.mode === "gemini" ? draft.voiceLanguage ?? locale : locale} autoPlay={Boolean(draft?.voiceLanguage) && !summaryEdited} />
+                </dd>
               </div>
               <div>
                 <dt className="text-xs font-semibold uppercase tracking-wide text-ink-secondary">
