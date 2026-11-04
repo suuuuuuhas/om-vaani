@@ -6,21 +6,39 @@ export function ListenButton({ text, locale, autoPlay = false }: { text: string;
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
   const url = useRef<string | null>(null);
   const autoRequested = useRef("");
-  useEffect(() => () => { if (url.current) URL.revokeObjectURL(url.current); }, []);
+  const activeRequest = useRef<AbortController | null>(null);
   useEffect(() => {
+    return () => {
+      activeRequest.current?.abort();
+      activeRequest.current = null;
+      if (url.current) { URL.revokeObjectURL(url.current); url.current = null; }
+    };
+  }, []);
+  useEffect(() => {
+    activeRequest.current?.abort();
+    activeRequest.current = null;
+    setBusy(false); setError("");
     if (url.current) { URL.revokeObjectURL(url.current); url.current = null; setAudioSrc(null); }
   }, [text, locale]);
   const listen = useCallback(async () => {
+    const controller = new AbortController();
+    activeRequest.current?.abort();
+    activeRequest.current = controller;
     setBusy(true); setError("");
     try {
       const response = await fetch("/api/voice/speak", { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, language: locale.includes("-") ? locale : `${locale}-IN` }) });
+        body: JSON.stringify({ text, language: locale.includes("-") ? locale : `${locale}-IN` }), signal: controller.signal });
       if (!response.ok) throw new Error("Could not play this summary. You can read it below.");
+      const audio = await response.blob();
+      if (controller.signal.aborted || activeRequest.current !== controller) return;
       if (url.current) URL.revokeObjectURL(url.current);
-      url.current = URL.createObjectURL(await response.blob());
+      url.current = URL.createObjectURL(audio);
       setAudioSrc(url.current);
-    } catch (e) { setError(e instanceof Error ? e.message : "Playback failed."); }
-    finally { setBusy(false); }
+    } catch (e) {
+      if (!controller.signal.aborted && activeRequest.current === controller) setError(e instanceof Error ? e.message : "Playback failed.");
+    } finally {
+      if (activeRequest.current === controller) { activeRequest.current = null; setBusy(false); }
+    }
   }, [text, locale]);
   useEffect(() => {
     const key = `${locale}\u0000${text}`;
