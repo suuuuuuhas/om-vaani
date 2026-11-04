@@ -88,9 +88,12 @@ export function checkSensitiveContent(text: string): PrivacyGuardResult {
   }
 
   // 12-digit sequences: block as possible Aadhaar unless UAN context applies.
-  const uanContext = UAN_CONTEXT.test(text);
-  const twelveDigit = findMatches(text, { kind: "aadhaar", pattern: AADHAAR });
-  if (twelveDigit > 0 && !uanContext) {
+  // Exempt only the number within a UAN-labelled span, not other numbers
+  // elsewhere in the same complaint.
+  const uanRanges = Array.from(text.matchAll(new RegExp(UAN_CONTEXT.source, "gi")))
+    .map(match => ({ start: match.index, end: match.index + match[0].length }));
+  const twelveDigit = Array.from(text.matchAll(new RegExp(AADHAAR.source, "g")));
+  if (twelveDigit.some(match => !uanRanges.some(range => match.index >= range.start && match.index + match[0].length <= range.end))) {
     push("aadhaar", "privacyMessages.aadhaar");
   }
 
@@ -112,12 +115,12 @@ export function checkSensitiveContent(text: string): PrivacyGuardResult {
     push("bank-credential", "privacyMessages.bank_credential");
   }
 
-  // Card candidates: only flag digit runs that pass Luhn and are not UAN-context.
+  // Card candidates: UANs have 12 digits and cannot exempt a longer card number.
   const cardRe = new RegExp(CARD_CANDIDATE.source, "g");
   let m: RegExpExecArray | null;
   while ((m = cardRe.exec(text)) !== null) {
     const digits = m[0].replace(/\D/g, "");
-    if (digits.length >= 13 && digits.length <= 19 && luhnValid(digits) && !uanContext) {
+    if (digits.length >= 13 && digits.length <= 19 && luhnValid(digits)) {
       push("card-number", "privacyMessages.card_number");
       break;
     }

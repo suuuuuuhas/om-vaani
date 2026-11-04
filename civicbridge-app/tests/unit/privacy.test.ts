@@ -8,6 +8,13 @@ describe("sensitive-data guard", () => {
     expect(checkSensitiveContent("Aadhaar XXXX XXXX 4321 on file").ok).toBe(false);
   });
 
+  it("does not let one labelled UAN exempt other sensitive numbers", () => {
+    const mixed = checkSensitiveContent("UAN 101234567890 and Aadhaar 2345 1234 5678");
+    expect(mixed.findings.some(f => f.kind === "aadhaar")).toBe(true);
+    const card = checkSensitiveContent("UAN 101234567890 and card 4111111111111111");
+    expect(card.findings.some(f => f.kind === "card-number")).toBe(true);
+  });
+
   it("blocks PAN numbers", () => {
     const result = checkSensitiveContent("PAN ABCDE1234F belongs to me");
     expect(result.ok).toBe(false);
