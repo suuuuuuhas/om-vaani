@@ -12,6 +12,8 @@ A second end-to-end synthetic test fed English, Hindi, and Telugu TTS through th
 
 A synthetic check of the remaining configured languages also returned TTS and STT HTTP 200 with matching detected codes for Tamil, Kannada, Malayalam, Marathi, Bengali, Gujarati, and Punjabi. Each used one short fictional consumer complaint. Some output was mixed-script; the Punjabi transcript did not clearly retain that the product arrived broken. This is a narrow check, not an accuracy guarantee or a substitute for real speakers.
 
+A follow-up synthetic response test requested Gemini triage in Tamil, Kannada, Malayalam, Marathi, Bengali, Gujarati, and Punjabi. Tamil returned a Tamil consumer-grievance summary in Gemini mode and produced OGG speech (HTTP 200). The remaining six requests returned offline fallback; production logs showed Gemini HTTP 429 responses. The cause (temporary rate limit versus exhausted quota) was not established, and response generation for those six languages remains unverified. Testing stopped to avoid further requests while limited.
+
 Browser verification showed the home, dashboard, Vaani controls, and a synthetic text-to-review journey. The greeting's playback request completed through the published interface. Actual microphone capture and recognition of a person speaking remain to be tested with the user's consent. The browser may require a play action if it blocks autoplay.
 
 The portal interface is translated into English, Hindi and Telugu. Prisma supports ten language codes and passes its detected language to the AI summary and speech request, but the remaining languages have not been validated with real speakers. Recognition can be wrong; the user must review and correct the transcript and extracted details.
