@@ -6,7 +6,7 @@ Cases and submission references in this prototype are simulated and stored in th
 
 **Independent hackathon prototype - not a government service.** CivicBridge helps a citizen describe a grievance in their own words, identifies which redressal system fits (National Consumer Helpline, EPFO, or Indian Railways via RailMadad / IRCTC TDR), prepares an editable case with synthetic evidence, tracks it in the browser, and suggests a **sourced next action** when it is time to escalate.
 
-Every citizen, case ID (`CB-2026-#####`), reference number, attachment, and response is **synthetic**. Nothing is uploaded; all data lives under the versioned browser key `civicbridge-demo-v1`.
+The seeded citizen, case IDs (`CB-2026-#####`), references, attachments and status events are **synthetic**. Case records live in the current browser under `civicbridge-demo-v1`. Voice recordings are sent to Gnani and AI requests are sent to Gemini when the user consents.
 
 ## Quickstart
 
@@ -15,17 +15,19 @@ npm install
 npm run dev          # http://localhost:3000
 ```
 
-Without an API key everything still works: every AI service degrades to deterministic offline rules and the UI says so ("Offline rules").
+Without the Gemini key, grievance analysis falls back to deterministic offline rules and the UI says so ("Offline rules"). Voice requires the Gnani STT and TTS keys.
 
 ### Environment variables (`.env.local`, see `.env.example`)
 
 | Variable | Required | Purpose |
 |---|---|---|
-| `OPENAI_API_KEY` | No | Enables live AI mode. Server-only; never shipped to the browser. |
-| `OPENAI_MODEL` | No | Defaults to `openrouter/stealth/ox-alpha`. |
-| `OPENAI_BASE_URL` | No | Point at an OpenRouter-compatible gateway (e.g. `https://openrouter.ai/api/v1`). Unset = api.openai.com. |
+| `GEMINI_API_KEY` | For AI | Google Gemini reasoning key, server only. |
+| `GEMINI_MODEL` | No | Defaults to `gemini-3.6-flash`. |
+| `GNANI_STT_API_KEY` | For voice input | Gnani Prisma v3 key, server only. |
+| `GNANI_TTS_API_KEY` | For voice output | Gnani Timbre key, server only. |
+| `SUPABASE_URL`, `SUPABASE_KEY` | Hosted | Private server credentials used for shared rate limiting. |
 
-Live mode tries the OpenAI Responses API first and automatically falls back to Chat Completions Structured Outputs, so both native OpenAI keys and OpenRouter-compatible gateways work with ox-alpha.
+With Gemini configured, live mode uses Gemini structured output and falls back to offline rules when it is unavailable. The legacy OpenAI-compatible adapter remains for existing test fixtures and optional configurations.
 
 ## Scripts
 
