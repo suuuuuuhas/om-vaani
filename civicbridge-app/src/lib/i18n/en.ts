@@ -30,7 +30,7 @@ export const en = {
   demo: {
     useCitizen: "Continue as demo citizen",
     activeAs: "Demo citizen: {name}",
-    note: "No name or phone number is ever collected."
+    note: "No account or phone number is required to start."
   },
   intake: {
     heading: "Describe your problem in your own words",
@@ -225,7 +225,7 @@ export const en = {
     generateLetter: "Prepare escalation letter",
     preparingLetter: "Preparing letter…",
     letterEditableNote:
-      "Edit the letter freely. Copy it or download it as a UTF-8 text file. Sending it anywhere is up to you - nothing leaves this browser.",
+      "Edit the letter freely. Copy it or download it as a UTF-8 text file. You decide whether to send it.",
     copy: "Copy letter",
     copied: "Copied",
     download: "Download .txt",
