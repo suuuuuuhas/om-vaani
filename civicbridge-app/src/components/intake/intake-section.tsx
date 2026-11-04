@@ -132,8 +132,8 @@ export function IntakeSection() {
       <form onSubmit={handleSubmit} noValidate className="min-w-0">
         <VaaniSaty onTranscript={(transcript, language) => { setVoiceLanguage(language ?? undefined); setText((previous) => [previous.trim(), transcript].filter(Boolean).join(" ").slice(0, MAX_CHARS)); }} />
         <div className="rounded-card border border-line bg-surface p-5 shadow-sm md:p-6">
-          <label className="mb-4 flex items-start gap-2 text-xs leading-relaxed"><input type="checkbox" checked={aiConsent} onChange={e => setAiConsent(e.target.checked)} className="mt-0.5" /><span>I agree to send my written description to Google Gemini for AI analysis. My draft stays in this browser.</span></label>
-          {consentError && !aiConsent && <p role="alert" className="mb-3 text-xs text-bad">Please agree to AI processing before continuing.</p>}
+          <label className="mb-4 flex items-start gap-2 text-xs leading-relaxed"><input type="checkbox" checked={aiConsent} onChange={e => setAiConsent(e.target.checked)} className="mt-0.5" /><span>{locale === "hi" ? "मैं AI विश्लेषण के लिए अपना लिखित विवरण Google Gemini को भेजने की सहमति देता/देती हूँ। मेरा ड्राफ्ट इसी ब्राउज़र में रहता है।" : locale === "te" ? "AI విశ్లేషణ కోసం నా వ్రాత వివరణను Google Geminiకి పంపడానికి అంగీకరిస్తున్నాను. నా డ్రాఫ్ట్ ఈ బ్రౌజర్‌లో ఉంటుంది." : "I agree to send my written description to Google Gemini for AI analysis. My draft stays in this browser."}</span></label>
+          {consentError && !aiConsent && <p role="alert" className="mb-3 text-xs text-bad">{locale === "hi" ? "आगे बढ़ने से पहले AI प्रोसेसिंग के लिए सहमति दें।" : locale === "te" ? "కొనసాగడానికి ముందు AI ప్రాసెసింగ్‌కు అంగీకరించండి." : "Please agree to AI processing before continuing."}</p>}
           <label htmlFor="grievance" className="block text-sm font-semibold">
             {dict.intake.textLabel}
           </label>
