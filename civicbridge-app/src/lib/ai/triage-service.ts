@@ -33,6 +33,10 @@ const SYSTEM_PROMPT = [
 ].join(" ");
 
 const NULLABLE_STRING = { type: ["string", "null"] } as const;
+const VOICE_LANGUAGES: Record<string, string> = {
+  "en-IN": "English", "hi-IN": "Hindi", "te-IN": "Telugu", "ta-IN": "Tamil", "kn-IN": "Kannada",
+  "ml-IN": "Malayalam", "mr-IN": "Marathi", "bn-IN": "Bengali", "gu-IN": "Gujarati", "pa-IN": "Punjabi"
+};
 
 const JSON_SCHEMA = {
   type: "object",
@@ -114,7 +118,7 @@ export async function triageGrievance(
     schemaName: "triage_result",
     jsonSchema: JSON_SCHEMA as unknown as Record<string, unknown>,
     systemPrompt: SYSTEM_PROMPT,
-    userPayload: JSON.stringify({ locale, response_language: voiceLanguage, grievance: text })
+    userPayload: JSON.stringify({ locale, response_language: voiceLanguage ? VOICE_LANGUAGES[voiceLanguage] : undefined, grievance: text })
   })) as RawAiTriage | null;
 
   if (raw) {

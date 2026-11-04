@@ -208,7 +208,7 @@ export function ReviewClient() {
                 <dt className="text-xs font-semibold uppercase tracking-wide text-ink-secondary">
                   {dict.review.summaryHeading}
                 </dt>
-                <dd className="mt-1 leading-relaxed">{triage.summary}<ListenButton text={triage.summary} locale={draft?.voiceLanguage ?? locale} /></dd>
+                <dd className="mt-1 leading-relaxed">{triage.summary}<ListenButton text={triage.summary} locale={draft?.mode === "gemini" ? draft.voiceLanguage ?? locale : locale} autoPlay={Boolean(draft?.voiceLanguage)} /></dd>
               </div>
               <div>
                 <dt className="text-xs font-semibold uppercase tracking-wide text-ink-secondary">
