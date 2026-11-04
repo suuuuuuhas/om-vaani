@@ -119,6 +119,9 @@ export interface DraftState {
   voiceLanguage?: string;
   triage: TriageResult | null;
   mode: ExecutionMode | null;
+  reviewFields?: Record<string, string>;
+  reviewSystem?: SystemId;
+  reviewSubflow?: RailwaySubflow;
 }
 
 export interface CaseRecord {

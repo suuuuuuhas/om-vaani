@@ -1,16 +1,10 @@
-import type { CaseRecord, DemoProfile } from "@/lib/types";
+import type { CaseRecord, DemoProfile, DraftState } from "@/lib/types";
 
 export interface DemoStore {
   version: 1;
   profile: DemoProfile;
   locale: CaseRecord["locale"];
-  draft: {
-    text: string;
-    locale: CaseRecord["locale"];
-    voiceLanguage?: string;
-    triage: CaseRecord["triage"] | null;
-    mode: "openai" | "gemini" | "fallback" | null;
-  } | null;
+  draft: DraftState | null;
   cases: CaseRecord[];
 }
 

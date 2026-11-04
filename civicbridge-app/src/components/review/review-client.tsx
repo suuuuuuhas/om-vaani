@@ -61,9 +61,9 @@ export function ReviewClient() {
   const draftKey = triage ? draft?.text ?? null : null;
   if (triage && draftKey && initializedFor !== draftKey) {
     setInitializedFor(draftKey);
-    setSystem(triage.system);
-    setSubflow(triage.railwaySubflow);
-    setFields({ ...triage.extractedFields });
+    setSystem(draft?.reviewSystem ?? triage.system);
+    setSubflow(draft?.reviewSystem ? draft.reviewSubflow : triage.railwaySubflow);
+    setFields({ ...triage.extractedFields, ...draft?.reviewFields });
     setOriginalText(draft?.text ?? "");
   }
 
@@ -93,14 +93,16 @@ export function ReviewClient() {
       const result = (await response.json()) as { data: TriageResult; mode: "gemini" | "openai" | "fallback" };
       if (result.mode === "fallback") throw new Error("retry unavailable");
       // Keep the user's category and edits; only fill empty fields from the new analysis.
-      setFields(previous => {
-        const next = { ...previous };
-        for (const [key, value] of Object.entries(result.data.extractedFields)) {
-          if (!next[key]?.trim()) next[key] = value;
-        }
-        return next;
-      });
-      saveDraft({ ...draft, voiceLanguage: followupLanguage ?? draft.voiceLanguage, triage: result.data, mode: result.mode });
+      const updatedFields = { ...fields };
+      for (const [key, value] of Object.entries(result.data.extractedFields)) {
+        if (!updatedFields[key]?.trim()) updatedFields[key] = value;
+      }
+      const updatedText = originalText.trim();
+      setFields(updatedFields);
+      setInitializedFor(updatedText);
+      saveDraft({ ...draft, text: updatedText, voiceLanguage: followupLanguage ?? draft.voiceLanguage,
+        triage: result.data, mode: result.mode, reviewFields: updatedFields,
+        reviewSystem: system ?? undefined, reviewSubflow: subflow });
     } catch {
       setRetryError(true);
     } finally {
@@ -294,6 +296,7 @@ export function ReviewClient() {
               </label>
               <select
                 id="system-select"
+                disabled={retrying}
                 value={system ?? ""}
                 onChange={(e) => {
                   const next = e.target.value as SystemId;
@@ -315,6 +318,7 @@ export function ReviewClient() {
                 </label>
                 <select
                   id="subflow-select"
+                  disabled={retrying}
                   value={subflow ?? "railmadad"}
                   onChange={(e) => setSubflow(e.target.value as RailwaySubflow)}
                   className="mt-1.5 min-h-11 w-full rounded-control border border-line bg-background px-3 text-sm"
@@ -359,6 +363,7 @@ export function ReviewClient() {
                   </label>
                   <input
                     id={`field-${key}`}
+                    disabled={retrying}
                     type="text"
                     value={fields[key] ?? ""}
                     onChange={(e) => updateField(key, e.target.value)}
@@ -381,7 +386,7 @@ export function ReviewClient() {
         <section aria-labelledby="voice-followup-heading" className="rounded-card border border-line bg-surface p-5">
           <h2 id="voice-followup-heading" className="text-base font-bold">{locale === "hi" ? "बोलकर और जानकारी जोड़ें" : locale === "te" ? "మాట్లాడి మరిన్ని వివరాలు చేర్చండి" : "Add details by voice"}</h2>
           <p className="mt-1 text-sm text-ink-secondary">{locale === "hi" ? "वाणी को बाकी जानकारी बताएँ, फिर नीचे लिखे विवरण की जाँच करें।" : locale === "te" ? "మిగిలిన వివరాలను వాణికి చెప్పి, కింద ఉన్న వచనాన్ని పరిశీలించండి." : "Tell Vaani anything you missed, then review the text below."}</p>
-          <VaaniSaty onTranscript={(transcript, language) => {
+          <VaaniSaty disabled={retrying} onTranscript={(transcript, language) => {
             const combined = [originalText.trim(), transcript].filter(Boolean).join(" ");
             if (combined.length > 4000) { setFollowupTooLong(true); return; }
             setFollowupTooLong(false);
@@ -391,7 +396,7 @@ export function ReviewClient() {
           }} />
           {followupTooLong && <p role="alert" className="mt-2 text-xs text-bad">{locale === "hi" ? "विवरण बहुत लंबा है। फिर बोलने से पहले कुछ पाठ हटाएँ।" : locale === "te" ? "వివరణ చాలా పొడవుగా ఉంది. మళ్లీ మాట్లాడే ముందు కొంత వచనం తొలగించండి." : "The description is too long. Remove some text before recording again."}</p>}
           <label htmlFor="voice-followup-text" className="mt-4 block text-sm font-semibold">{locale === "hi" ? "पूरा विवरण जाँचें और सुधारें" : locale === "te" ? "పూర్తి వివరణను పరిశీలించి సవరించండి" : "Review and correct the full description"}</label>
-          <textarea id="voice-followup-text" value={originalText} onChange={event => setOriginalText(event.target.value.slice(0, 4000))} maxLength={4000} rows={5} className="mt-2 w-full resize-y rounded-control border border-line bg-background px-3 py-2 text-sm" />
+          <textarea id="voice-followup-text" disabled={retrying} value={originalText} onChange={event => setOriginalText(event.target.value.slice(0, 4000))} maxLength={4000} rows={5} className="mt-2 w-full resize-y rounded-control border border-line bg-background px-3 py-2 text-sm" />
           <button type="button" onClick={() => void retryAnalysis()} disabled={retrying} className="mt-3 min-h-11 rounded-control border border-line px-4 text-sm font-semibold text-accent disabled:opacity-50">{retrying ? (locale === "hi" ? "जाँच हो रही है…" : locale === "te" ? "పరిశీలిస్తున్నాం…" : "Checking…") : (locale === "hi" ? "विवरण से फिर जाँचें" : locale === "te" ? "వివరణతో మళ్లీ పరిశీలించండి" : "Update analysis")}</button>
           <p className="mt-2 text-xs text-ink-secondary">{locale === "hi" ? "इससे विवरण Google Gemini को भेजा जाएगा। आपके भरे हुए विवरण और चुनी प्रणाली बने रहेंगे।" : locale === "te" ? "దీనితో వివరణ Google Geminiకి పంపబడుతుంది. మీరు నింపిన వివరాలు, ఎంచుకున్న వ్యవస్థ అలాగే ఉంటాయి." : "This sends the description to Google Gemini. Your filled details and selected system stay in place."}</p>
           {retryError && <p role="status" className="mt-2 text-xs text-bad">{locale === "hi" ? "AI अभी उपलब्ध नहीं है या विवरण की जाँच ज़रूरी है। फिर कोशिश करें।" : locale === "te" ? "AI అందుబాటులో లేదు లేదా వివరణను పరిశీలించాలి. మళ్లీ ప్రయత్నించండి." : "AI is unavailable or the description needs checking. Please try again."}</p>}
@@ -457,6 +462,7 @@ export function ReviewClient() {
             id="original-text"
             rows={7}
             value={originalText}
+            disabled={retrying}
             onChange={(e) => setOriginalText(e.target.value)}
             className="mt-1.5 w-full resize-y rounded-control border border-line bg-background px-3 py-2 text-sm leading-relaxed"
           />

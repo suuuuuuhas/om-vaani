@@ -35,7 +35,7 @@ function wavBlob(chunks: Float32Array[], sampleRate: number): Blob {
   return new Blob([buffer], { type: "audio/wav" });
 }
 
-export function VaaniSaty({ onTranscript }: { onTranscript: (text: string, language: string | null) => void }) {
+export function VaaniSaty({ onTranscript, disabled = false }: { onTranscript: (text: string, language: string | null) => void; disabled?: boolean }) {
   const { locale, setLocale } = useApp();
   const words = copy[locale];
   const [consent, setConsent] = useState(false);
@@ -99,8 +99,8 @@ export function VaaniSaty({ onTranscript }: { onTranscript: (text: string, langu
 
   return <div className="mt-5 rounded-card border border-accent/30 bg-accent-soft p-4">
     <div className="flex items-center gap-3"><Image src="/vaani-saty.png" alt="" width={56} height={56} className="size-14 shrink-0 rounded-full object-cover object-top" /><div><p className="font-bold">Vaani Saty</p><p className="text-xs text-ink-secondary">{words.guide}</p></div></div>
-    <label className="mt-3 flex items-start gap-2 text-xs leading-relaxed"><input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} className="mt-0.5" /> <span>{words.consent}</span></label>
-    <div className="mt-3 flex flex-wrap gap-2"><button type="button" onClick={state === "recording" ? () => void stop() : () => void record()} disabled={state !== "idle" && state !== "recording"} className="min-h-11 rounded-control bg-accent px-4 text-sm font-semibold text-onaccent disabled:opacity-50">{state === "recording" ? words.stop : words.speak}</button><button type="button" onClick={() => void speak()} disabled={state !== "idle"} className="min-h-11 rounded-control border border-line bg-surface px-4 text-sm font-semibold disabled:opacity-50">{words.listen}</button></div>
+    <label className="mt-3 flex items-start gap-2 text-xs leading-relaxed"><input type="checkbox" disabled={disabled} checked={consent} onChange={e => setConsent(e.target.checked)} className="mt-0.5" /> <span>{words.consent}</span></label>
+    <div className="mt-3 flex flex-wrap gap-2"><button type="button" onClick={state === "recording" ? () => void stop() : () => void record()} disabled={disabled || (state !== "idle" && state !== "recording")} className="min-h-11 rounded-control bg-accent px-4 text-sm font-semibold text-onaccent disabled:opacity-50">{state === "recording" ? words.stop : words.speak}</button><button type="button" onClick={() => void speak()} disabled={disabled || state !== "idle"} className="min-h-11 rounded-control border border-line bg-surface px-4 text-sm font-semibold disabled:opacity-50">{words.listen}</button></div>
     <p role="status" className="mt-2 text-xs text-ink-secondary">{message || words.hint}</p>
   </div>;
 }
