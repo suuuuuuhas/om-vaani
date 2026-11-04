@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ListenButton } from "@/components/voice/listen-button";
+import { VaaniSaty } from "@/components/voice/vaani-saty";
 import {
   ArrowLeft,
   CheckCircle,
@@ -48,6 +49,8 @@ export function ReviewClient() {
   const [submitting, setSubmitting] = useState(false);
   const [retrying, setRetrying] = useState(false);
   const [retryError, setRetryError] = useState(false);
+  const [followupLanguage, setFollowupLanguage] = useState<string | undefined>();
+  const [followupTooLong, setFollowupTooLong] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const draft = store?.draft ?? null;
@@ -84,7 +87,7 @@ export function ReviewClient() {
     try {
       const response = await fetch("/api/ai/triage", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: originalText.trim(), locale, voiceLanguage: draft.voiceLanguage })
+        body: JSON.stringify({ text: originalText.trim(), locale, voiceLanguage: followupLanguage ?? draft.voiceLanguage })
       });
       if (!response.ok) throw new Error("retry unavailable");
       const result = (await response.json()) as { data: TriageResult; mode: "gemini" | "openai" | "fallback" };
@@ -97,7 +100,7 @@ export function ReviewClient() {
         }
         return next;
       });
-      saveDraft({ ...draft, triage: result.data, mode: result.mode });
+      saveDraft({ ...draft, voiceLanguage: followupLanguage ?? draft.voiceLanguage, triage: result.data, mode: result.mode });
     } catch {
       setRetryError(true);
     } finally {
@@ -374,6 +377,25 @@ export function ReviewClient() {
             </div>
           </section>
         )}
+
+        <section aria-labelledby="voice-followup-heading" className="rounded-card border border-line bg-surface p-5">
+          <h2 id="voice-followup-heading" className="text-base font-bold">{locale === "hi" ? "बोलकर और जानकारी जोड़ें" : locale === "te" ? "మాట్లాడి మరిన్ని వివరాలు చేర్చండి" : "Add details by voice"}</h2>
+          <p className="mt-1 text-sm text-ink-secondary">{locale === "hi" ? "वाणी को बाकी जानकारी बताएँ, फिर नीचे लिखे विवरण की जाँच करें।" : locale === "te" ? "మిగిలిన వివరాలను వాణికి చెప్పి, కింద ఉన్న వచనాన్ని పరిశీలించండి." : "Tell Vaani anything you missed, then review the text below."}</p>
+          <VaaniSaty onTranscript={(transcript, language) => {
+            const combined = [originalText.trim(), transcript].filter(Boolean).join(" ");
+            if (combined.length > 4000) { setFollowupTooLong(true); return; }
+            setFollowupTooLong(false);
+            setFollowupLanguage(language ?? undefined);
+            setOriginalText(combined);
+            setRetryError(false);
+          }} />
+          {followupTooLong && <p role="alert" className="mt-2 text-xs text-bad">{locale === "hi" ? "विवरण बहुत लंबा है। फिर बोलने से पहले कुछ पाठ हटाएँ।" : locale === "te" ? "వివరణ చాలా పొడవుగా ఉంది. మళ్లీ మాట్లాడే ముందు కొంత వచనం తొలగించండి." : "The description is too long. Remove some text before recording again."}</p>}
+          <label htmlFor="voice-followup-text" className="mt-4 block text-sm font-semibold">{locale === "hi" ? "पूरा विवरण जाँचें और सुधारें" : locale === "te" ? "పూర్తి వివరణను పరిశీలించి సవరించండి" : "Review and correct the full description"}</label>
+          <textarea id="voice-followup-text" value={originalText} onChange={event => setOriginalText(event.target.value.slice(0, 4000))} maxLength={4000} rows={5} className="mt-2 w-full resize-y rounded-control border border-line bg-background px-3 py-2 text-sm" />
+          <button type="button" onClick={() => void retryAnalysis()} disabled={retrying} className="mt-3 min-h-11 rounded-control border border-line px-4 text-sm font-semibold text-accent disabled:opacity-50">{retrying ? (locale === "hi" ? "जाँच हो रही है…" : locale === "te" ? "పరిశీలిస్తున్నాం…" : "Checking…") : (locale === "hi" ? "विवरण से फिर जाँचें" : locale === "te" ? "వివరణతో మళ్లీ పరిశీలించండి" : "Update analysis")}</button>
+          <p className="mt-2 text-xs text-ink-secondary">{locale === "hi" ? "इससे विवरण Google Gemini को भेजा जाएगा। आपके भरे हुए विवरण और चुनी प्रणाली बने रहेंगे।" : locale === "te" ? "దీనితో వివరణ Google Geminiకి పంపబడుతుంది. మీరు నింపిన వివరాలు, ఎంచుకున్న వ్యవస్థ అలాగే ఉంటాయి." : "This sends the description to Google Gemini. Your filled details and selected system stay in place."}</p>
+          {retryError && <p role="status" className="mt-2 text-xs text-bad">{locale === "hi" ? "AI अभी उपलब्ध नहीं है या विवरण की जाँच ज़रूरी है। फिर कोशिश करें।" : locale === "te" ? "AI అందుబాటులో లేదు లేదా వివరణను పరిశీలించాలి. మళ్లీ ప్రయత్నించండి." : "AI is unavailable or the description needs checking. Please try again."}</p>}
+        </section>
 
         <section aria-labelledby="attachments-heading" className="rounded-card border border-line bg-surface p-5">
           <h2 id="attachments-heading" className="text-base font-bold">
