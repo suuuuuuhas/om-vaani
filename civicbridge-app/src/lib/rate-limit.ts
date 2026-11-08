@@ -17,7 +17,9 @@ export async function allowRequest(request: Request, area: string, max: number):
       return response.ok && await response.json() === true;
     } catch { return false; }
   }
-  if (process.env.VERCEL === "1") return false;
+  // Protected preview only: deployments are gated by Vercel SSO. Production
+  // still fails closed without the shared limiter.
+  if (process.env.VERCEL === "1" && !(process.env.VERCEL_ENV === "preview" && process.env.VAANI_PREVIEW_SESSION_ONLY === "1")) return false;
   const now = Date.now(), previous = local.get(key);
   if (!previous || previous.until <= now) { local.set(key, { until: now + 60000, count: 1 }); return true; }
   previous.count += 1;
