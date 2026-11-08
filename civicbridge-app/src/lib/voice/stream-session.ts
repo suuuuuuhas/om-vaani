@@ -15,14 +15,14 @@ type ProviderMessage = { type?: string; text?: string; detected_language_code?: 
 export function startVoiceSession(client: WebSocket) {
   const sttKey = process.env.GNANI_STT_API_KEY!, ttsKey = process.env.GNANI_TTS_API_KEY!, geminiKey = process.env.GEMINI_API_KEY!;
   let upstream: WebSocket | null = null, tts: WebSocket | null = null, request: AbortController | null = null;
-  let destroyed = false, started = false, generation = 0, busy = false, pending = "", allText = "", language = "", languageOverride = "", locale: Locale = "en";
+  let destroyed = false, started = false, generation = 0, busy = false, speaking = false, pending = "", allText = "", language = "", languageOverride = "", locale: Locale = "en";
   let turnTimer: ReturnType<typeof setTimeout> | null = null;
   let frameWindow = Date.now(), frameCount = 0;
   const history: History[] = [];
   const deadline = setTimeout(() => { send({ type: "error", code: "session_timeout" }); close(); }, 180_000);
   const send = (event: Record<string, unknown>) => { if (!destroyed && client.readyState === WebSocket.OPEN) client.send(JSON.stringify(event)); };
   function close() { if (destroyed) return; destroyed = true; clearTimeout(deadline); if (turnTimer) clearTimeout(turnTimer); request?.abort(); upstream?.close(); tts?.close(); if (client.readyState === WebSocket.OPEN) client.close(); }
-  function cancelResponse() { if (!busy && !request && !tts) return; generation++; request?.abort(); request = null; tts?.close(); tts = null; busy = false; send({ type: "interrupted" }); }
+  function cancelResponse() { if (!busy && !request && !tts) return; generation++; request?.abort(); request = null; tts?.close(); tts = null; busy = false; speaking = false; send({ type: "interrupted" }); }
   function queueTurn() { if (turnTimer) clearTimeout(turnTimer); turnTimer = setTimeout(() => { turnTimer = null; const text = pending.trim(); pending = ""; if (text) void respond(text); }, 650); }
   async function respond(text: string) {
     if (destroyed) return;
@@ -54,7 +54,7 @@ export function startVoiceSession(client: WebSocket) {
     }
     function finishIfDone() {
       if (!destroyed && turn === generation && streamDone && !queue.length && !ttsBusy && !ttsEnded) {
-        ttsEnded = true; busy = false; request = null; if (tts === ws) tts = null; ws.close(); send({ type: "response_complete" });
+        ttsEnded = true; busy = false; speaking = false; request = null; if (tts === ws) tts = null; ws.close(); send({ type: "response_complete" });
       }
     }
     function pump() {
@@ -69,7 +69,7 @@ export function startVoiceSession(client: WebSocket) {
       if (destroyed || turn !== generation) return;
       try {
         const event = JSON.parse(raw.toString()) as ProviderMessage;
-        if (event.type === "audio" && event.data?.audio) send({ type: "audio", audio: event.data.audio, sampleRate: 24000 });
+        if (event.type === "audio" && event.data?.audio) { speaking = true; send({ type: "audio", audio: event.data.audio, sampleRate: 24000 }); }
         if (event.type === "complete" || event.data?.is_final) { ttsBusy = false; pump(); }
         if (event.type === "error") failTts();
       } catch { failTts(); }
@@ -136,7 +136,9 @@ export function startVoiceSession(client: WebSocket) {
         try {
           const event = JSON.parse(raw.toString()) as ProviderMessage;
           if (event.type === "connected") send({ type: "ready" });
-          else if (event.type === "speech_start") { if (turnTimer) { clearTimeout(turnTimer); turnTimer = null; } cancelResponse(); send({ type: "speech_start" }); }
+          // Prisma transcripts are finalized turns. A subsequent VAD event must
+          // not discard that queued turn or abort Gemini before it can reply.
+          else if (event.type === "speech_start") { if (speaking) cancelResponse(); send({ type: "speech_start" }); }
           else if (event.type === "processing") send({ type: "speech_end" });
           else if (event.type === "transcript" && typeof event.text === "string" && event.text.trim()) {
             if (allowedLanguages.has(event.detected_language_code || "")) language = event.detected_language_code!;
