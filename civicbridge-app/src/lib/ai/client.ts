@@ -99,7 +99,7 @@ export async function generateJson(
   if (!opts.client && process.env.GEMINI_API_KEY) {
     try {
       const apiKey = process.env.GEMINI_API_KEY;
-      const model = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+      const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
       const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
       const requestBody = JSON.stringify({
         systemInstruction: { parts: [{ text: opts.systemPrompt }] },
@@ -188,3 +188,4 @@ export async function generateJson(
     return null;
   }
 }
+
