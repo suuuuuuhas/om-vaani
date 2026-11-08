@@ -92,10 +92,12 @@ export function startVoiceSession(client: WebSocket) {
     }
     try {
       const options = { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": geminiKey }, body: JSON.stringify({ systemInstruction: { parts: [{ text: `${systemPrompt} Reply in the language identified by ${replyLanguage}.` }] }, contents: history.slice(-12), generationConfig: { maxOutputTokens: 450, thinkingConfig: { thinkingLevel: "LOW" } } }), signal: controller.signal };
-      let response = await fetch(GEMINI_URL, options);
-      if (response.status === 503) {
-        await response.body?.cancel();
-        send({ type: "model_fallback", text: "Gemini 3.8 Flash is busy. Using Gemini 3.5 Flash-Lite for this reply." });
+      let response: Response | null = null;
+      try { response = await fetch(GEMINI_URL, { ...options, signal: AbortSignal.any([controller.signal, AbortSignal.timeout(8000)]) }); }
+      catch (error) { if (controller.signal.aborted) throw error; }
+      if (!response || response.status === 503) {
+        await response?.body?.cancel();
+        send({ type: "model_fallback", text: "Gemini 3.8 Flash is busy or too slow to respond. Using Gemini 3.5 Flash-Lite for this reply." });
         response = await fetch(GEMINI_URL.replace(GEMINI_MODEL, "gemini-3.5-flash-lite"), options);
       }
       if (!response.ok || !response.body) { console.warn("Vaani Gemini HTTP failure", response.status); send({ type: "error", code: response.status === 429 ? "ai_quota" : "ai_unavailable", status: response.status }); ttsEnded = true; ws.close(); if (tts === ws) tts = null; busy = false; request = null; return; }
