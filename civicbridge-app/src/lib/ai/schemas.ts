@@ -11,6 +11,7 @@ export const TriageResultSchema = z.object({
   system: SystemIdSchema,
   railwaySubflow: RailwaySubflowSchema.optional(),
   summary: z.string().min(1).max(600),
+  assistantReply: z.string().min(1).max(450).optional(),
   extractedFields: z.record(z.string(), z.string().max(80)),
   missingFields: z.array(z.string().max(40)).max(12),
   confidence: z.number().min(0).max(1),

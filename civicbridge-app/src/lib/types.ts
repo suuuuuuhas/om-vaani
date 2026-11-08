@@ -69,6 +69,8 @@ export interface TriageResult {
   railwaySubflow?: RailwaySubflow;
   /** Plain-language summary in the requested locale. */
   summary: string;
+  /** Short conversational response to the most recent voice turn. */
+  assistantReply?: string;
   extractedFields: Record<string, string>;
   missingFields: string[];
   /** 0..1 */

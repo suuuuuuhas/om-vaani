@@ -1,12 +1,4 @@
 import type { Metadata } from "next";
-import { IntakeSection } from "@/components/intake/intake-section";
-
-export const metadata: Metadata = {
-  title: "Civic Sathi - grievance navigator prototype",
-  description:
-    "Describe a grievance in your own words. Civic Sathi identifies the right system, prepares the case, tracks it, and suggests sourced next steps."
-};
-
-export default function HomePage() {
-  return <IntakeSection />;
-}
+import { VoiceExperience } from "@/components/voice/voice-experience";
+export const metadata: Metadata = { title: "Talk to Vaani", description: "A voice-first space to prepare a grievance." };
+export default function HomePage() { return <VoiceExperience />; }

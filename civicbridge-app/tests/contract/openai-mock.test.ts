@@ -73,6 +73,15 @@ describe("triage service contract", () => {
     expect(result.data.missingFields).toEqual([]);
   });
 
+  it("keeps Vaani's conversational reply alongside the case summary", async () => {
+    const value = JSON.parse(VALID_TRIAGE_JSON);
+    value.assistantReply = "I'm sorry the mixer arrived damaged. How much did you pay?";
+    const client = fakeClient(async () => ({ output_text: JSON.stringify(value) }));
+    const result = await triageGrievance("The mixer arrived broken and the seller refused my refund.", "en", client);
+    expect(result.data.assistantReply).toBe(value.assistantReply);
+    expect(result.data.summary).toBe(value.summary);
+  });
+
   it("falls back on malformed JSON", async () => {
     const client = fakeClient(async () => ({
       output_text: '{"system": "nch", broken...'
