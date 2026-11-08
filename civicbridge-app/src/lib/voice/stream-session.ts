@@ -91,8 +91,14 @@ export function startVoiceSession(client: WebSocket) {
       if (flush && speechBuffer.trim()) { queue.push(speechBuffer.trim()); speechBuffer = ""; pump(); }
     }
     try {
-      const response = await fetch(GEMINI_URL, { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": geminiKey }, body: JSON.stringify({ systemInstruction: { parts: [{ text: `${systemPrompt} Reply in the language identified by ${replyLanguage}.` }] }, contents: history.slice(-12), generationConfig: { maxOutputTokens: 450, thinkingConfig: { thinkingLevel: "LOW" } } }), signal: controller.signal });
-      if (!response.ok || !response.body) { send({ type: "error", code: response.status === 429 ? "ai_quota" : "ai_unavailable" }); ttsEnded = true; ws.close(); if (tts === ws) tts = null; busy = false; request = null; return; }
+      const options = { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": geminiKey }, body: JSON.stringify({ systemInstruction: { parts: [{ text: `${systemPrompt} Reply in the language identified by ${replyLanguage}.` }] }, contents: history.slice(-12), generationConfig: { maxOutputTokens: 450, thinkingConfig: { thinkingLevel: "LOW" } } }), signal: controller.signal };
+      let response = await fetch(GEMINI_URL, options);
+      if (response.status === 503) {
+        await response.body?.cancel();
+        send({ type: "model_fallback", text: "Gemini 3.8 Flash is busy. Using Gemini 3.5 Flash-Lite for this reply." });
+        response = await fetch(GEMINI_URL.replace(GEMINI_MODEL, "gemini-3.5-flash-lite"), options);
+      }
+      if (!response.ok || !response.body) { console.warn("Vaani Gemini HTTP failure", response.status); send({ type: "error", code: response.status === 429 ? "ai_quota" : "ai_unavailable", status: response.status }); ttsEnded = true; ws.close(); if (tts === ws) tts = null; busy = false; request = null; return; }
       const reader = response.body.getReader(), decoder = new TextDecoder(); let buffer = "";
       while (true) {
         const part = await reader.read(); if (part.done) break;

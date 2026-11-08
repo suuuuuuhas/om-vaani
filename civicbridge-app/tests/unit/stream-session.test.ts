@@ -23,10 +23,14 @@ it('does not discard a finalized transcript when another speech-start event arri
  stt.emit('message',Buffer.from(JSON.stringify({type:'transcript',text:'The streetlight has been broken for two weeks.',detected_language_code:'en-IN'})));
  stt.emit('message',Buffer.from(JSON.stringify({type:'speech_start'})));
  await vi.advanceTimersByTimeAsync(700);
- expect(fetchMock).toHaveBeenCalledOnce();
+ expect(fetchMock).toHaveBeenCalledTimes(2);
+ expect(String(fetchMock.mock.calls[0][0])).toContain('gemini-3.8-flash:');
+ expect(String(fetchMock.mock.calls[1][0])).toContain('gemini-3.5-flash-lite:');
  const sent = (client.send as ReturnType<typeof vi.fn>).mock.calls.map(args=>JSON.parse(args[0]));
  expect(sent.some(e=>e.type==='user_final')).toBe(true);
  expect(sent.some(e=>e.type==='thinking')).toBe(true);
+ expect(sent.some(e=>e.type==='model_fallback')).toBe(true);
  client.close();
 });
+
 

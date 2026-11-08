@@ -147,6 +147,7 @@ export function VoiceExperience() {
     else if (data.type === "interrupted") { stopAudio(); replyDone.current = true; setPhase("listening"); }
     else if (data.type === "details" && data.data) { detailRef.current = data.data; setTriage(data.data); detailTextRef.current = transcriptRef.current; detailModeRef.current = data.mode || "fallback"; setMode(detailModeRef.current); }
     else if (data.type === "privacy_blocked") { setPartial(data.text || ""); setError(words[localeRef.current].blocked); setPhase("error"); }
+    else if (data.type === "model_fallback" && data.text) { setError(data.text); }
     else if (data.type === "details_unavailable") { setError(words[localeRef.current].limited); }
     else if (data.type === "error") {
       const stages: Record<string, string> = { recognition_unavailable: "Speech recognition couldn't connect. End this conversation and try again.", recognition_closed: "Speech recognition disconnected. Start a new conversation.", voice_unavailable: "Vaani's speech service couldn't produce audio. Your conversation remains visible above.", ai_unavailable: "Gemini couldn't generate a reply. Please try again.", session_timeout: "This voice session has ended. Tap to start another conversation.", invalid_audio: "The microphone audio format was rejected. Please restart the conversation." };
