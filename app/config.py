@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     default_language: str = 'te-IN'
     gemini_model: str = 'gemini-3.6-flash'
     gemini_api_mode: str = 'generate_content'
+    gemini_thinking_level: str = 'low'
     gnani_tts_model: str = 'timbre-v3.0'
     gnani_tts_voice: str = 'Shivani'
     storage_backend: str = 'sqlite'

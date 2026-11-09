@@ -14,7 +14,7 @@ from uuid import UUID
 import httpx
 from dotenv import set_key
 from fastapi import FastAPI, Request, HTTPException, UploadFile, File, Form, Query
-from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from starlette.middleware.trustedhost import TrustedHostMiddleware
@@ -121,6 +121,8 @@ async def headers_and_limits(request: Request, call_next):
     response.headers.update({'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer',
                              'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY',
                              'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self' blob: https://*.supabase.co; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"})
+    if request.url.path.startswith('/static/') and request.url.path != '/static/setup.html':
+        response.headers['Cache-Control'] = 'public, max-age=3600, must-revalidate'
     return response
 
 
@@ -272,6 +274,13 @@ async def retry_speech(sid: str, request: Request, data: SpeechRequest | None = 
     stage = time.monotonic()
     audio_reply = await synthesize(speech, session['language'])
     synthesis_ms = round((time.monotonic()-stage)*1000)
+    if data and data.delivery == 'audio':
+        # Browser playback needs no storage upload, signing request, or signed-URL download.
+        # The existing JSON/URL response remains the default for API clients.
+        return Response(audio_reply, media_type='audio/ogg', headers={
+            'X-Speech-Synthesis-Ms': str(synthesis_ms),
+            'Content-Disposition': 'inline; filename="om-vaani-reply.ogg"',
+        })
     stage = time.monotonic()
     url = await save_audio(audio_reply)
     return {'reply_audio_url': url, 'speech_request_id': data.request_id if data else None,

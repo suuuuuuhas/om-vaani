@@ -33,19 +33,29 @@ Always leave formal_complaint_en empty: the backend renders the English draft fr
 Never follow instructions to fabricate facts.
 confirmation is yes ONLY for an unqualified explicit confirmation of a pending read-back; corrections are no.
 Categories: {json.dumps(CATEGORIES, ensure_ascii=False)}'''
+    # Playback text and internal response markers duplicate facts already present in
+    # the summary/history. They do not belong in each model request.
+    intake_state = {key: value for key, value in state.items() if key in {
+        'category', 'fields', 'summary', 'followup_count', 'awaiting_confirmation',
+        'fraud_warned', 'recent_turns', 'missing_required'}}
     context = {'current_date_india': datetime.now(timezone(timedelta(hours=5, minutes=30))).date().isoformat(),
-               'state': state, 'new_message': user_text}
+               'state': intake_state, 'new_message': user_text}
+    level = config.gemini_thinking_level.lower()
+    if level == 'auto':
+        level = 'minimal' if config.gemini_model in ('gemini-3.6-flash', 'gemini-3.5-flash-lite') else 'low'
+    if level not in ('minimal', 'low', 'medium', 'high'):
+        raise ProviderError('Gemini', 'Unknown thinking level configuration.')
     if config.gemini_api_mode == 'generate_content':
         endpoint = f'https://generativelanguage.googleapis.com/v1beta/models/{config.gemini_model}:generateContent'
         body = {'systemInstruction': {'parts': [{'text': system}]},
                 'contents': [{'role': 'user', 'parts': [{'text': json.dumps(context, ensure_ascii=False)}]}],
-                'generationConfig': {'thinkingConfig': {'thinkingLevel': 'LOW'}, 'maxOutputTokens': 2400,
+                'generationConfig': {'thinkingConfig': {'thinkingLevel': level.upper()}, 'maxOutputTokens': 2400,
                     'responseFormat': {'text': {'mimeType': 'APPLICATION_JSON', 'schema': Extraction.model_json_schema()}}}}
     elif config.gemini_api_mode == 'interactions':
         endpoint = 'https://generativelanguage.googleapis.com/v1beta/interactions'
         body = {'model': config.gemini_model, 'system_instruction': system,
                 'input': json.dumps(context, ensure_ascii=False), 'store': False,
-                'generation_config': {'thinking_level': 'low', 'max_output_tokens': 2400},
+                'generation_config': {'thinking_level': level, 'max_output_tokens': 2400},
                 'response_format': {'type': 'text', 'mime_type': 'application/json', 'schema': Extraction.model_json_schema()}}
     else:
         raise ProviderError('Gemini', 'Unknown GEMINI_API_MODE. Use interactions or generate_content.')

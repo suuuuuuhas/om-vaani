@@ -123,6 +123,23 @@ def test_speech_retry_is_authorized_and_does_not_change_draft(client,monkeypatch
     assert asyncio.run(main.engine.repo.get_session(sid))['complaint_id'] is None
 
 
+def test_speech_can_return_audio_without_storage(client, monkeypatch):
+    start=client.post('/api/sessions',json={'phone':'919999991234','language':'en-IN','consent':True}).json()
+    sid=start['session_id']
+    session=asyncio.run(main.engine.repo.get_session(sid))
+    session['speech_requests']={'request01':'A spoken reply.'}
+    asyncio.run(main.engine.repo.save_turn(session))
+    monkeypatch.setattr('app.tts.synthesize',AsyncMock(return_value=b'OggStest'))
+    save=AsyncMock(side_effect=AssertionError('Inline playback must not upload audio'))
+    monkeypatch.setattr('app.storage.save_audio',save)
+    path=f'/api/sessions/{sid}/speech'
+    body={'request_id':'request01','delivery':'audio'}
+    assert client.post(path,json=body).status_code==404
+    response=client.post(path,json=body,headers={'Authorization':'Bearer '+start['access_token']})
+    assert response.status_code==200 and response.content==b'OggStest'
+    assert response.headers['content-type']=='audio/ogg' and save.await_count==0
+
+
 def test_speech_stays_bound_to_its_turn_after_newer_confirmation(client,monkeypatch):
     extracted=Extraction(category='delivery_or_food',fields={'platform':'Example Food','amount':350,
         'date':'2026-10-24','problem':'Not delivered','resolution':'Refund'},urgent_fraud=False,

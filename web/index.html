@@ -1,6 +1,64 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Describe a consumer problem in your language. Prepare a clear complaint draft with Gnani Prisma and Timbre."><title>Om Vaani — Your voice. A clear complaint.</title><link rel="stylesheet" href="/static/style.css"><script src="/static/app.js" defer></script></head><body>
-<header><a class="brand" href="/" aria-label="Om Vaani home"><span class="brand-icon" aria-hidden="true">ॐ</span>Om Vaani</a><nav><a href="/status">Track a draft ↗</a><a href="#how">How it works</a></nav></header>
-<main><section class="hero"><div><span class="eyebrow">Your language. Your consumer rights.</span><h1>A problem worth<br>speaking <em>up for.</em></h1><p class="lead">A broken delivery. A missing refund. A payment that went nowhere. Tell us in your language. We’ll help you put it into words.</p><div class="actions"><a id="whatsapp" class="btn" href="#assistant">Start a complaint ↗</a><a class="btn secondary" href="/status">Find my draft</a></div><p id="whatsapp-note" class="micro">Speak or type below. You review every draft before it is saved.</p><div class="language-strip" aria-label="Supported languages">తెలుగు हिन्दी தமிழ் ಕನ್ನಡ മലയാളം मराठी বাংলা ગુજરાતી ਪੰਜਾਬੀ English</div></div>
-<section class="assistant" id="assistant" aria-label="Complaint assistant"><div class="assistant-top"><div><strong>Let’s hear your side.</strong><p class="micro">Prisma listens · Timbre speaks</p></div><span class="micro"><span class="live-dot"></span>Voice + text</span></div><div class="assistant-body"><div id="connection" class="notice" role="status">Checking connection…</div><form id="start-form"><label for="language">Choose your language</label><select id="language" name="language"></select><label for="phone">Your mobile number</label><input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="e.g. 919876543210" pattern="\+?[0-9]{10,15}" required><p class="micro">Used to find your draft later. A test number is fine for a demo.</p><label class="check-label"><input id="consent" type="checkbox" required><span>I agree to send my messages to Gnani and Google for this draft. Draft details are stored for lookup. I won’t share OTPs, passwords or bank account numbers.</span></label><button class="wide" type="submit">Tell us what happened →</button></form>
-<div id="chat" hidden><div id="conversation" class="conversation" role="log" aria-live="polite" aria-label="Conversation"></div><form id="message-form"><label for="message">Your message</label><textarea id="message" placeholder="Describe the problem, or answer the last question…" maxlength="6000"></textarea><div class="reply-tools"><button type="submit" id="send">Send message ↑</button><button type="button" class="record-button" id="record">● Record voice</button><button type="button" class="secondary" id="upload">Upload audio</button><input type="file" id="audio-file" accept="audio/*" hidden></div><p id="record-status" class="micro" aria-live="polite">Voice clips: up to 60 seconds. Try 30 seconds for a faster reply.</p></form><div id="chat-notice" role="status" hidden></div><button type="button" class="secondary" id="restart">New conversation</button></div></div></section></section>
-<section id="how" class="proof" aria-label="How it works"><article><span>01 / SPEAK</span><h3>Say it your way.</h3><p>Choose from ten supported languages. A voice note or a few words is enough to begin.</p></article><article><span>02 / REVIEW</span><h3>Make sure it’s right.</h3><p>We ask for missing details, then read back your story. You decide when it’s correct.</p></article><article><span>03 / TAKE THE NEXT STEP</span><h3>A draft. A way forward.</h3><p>Get an English complaint draft, a reference number, and suggested places to send it.</p></article></section><p class="disclaimer">Om Vaani is a drafting aid, not legal advice or a government service. Your draft is never automatically sent to a company or authority. Status lookup tracks your saved draft, not an official complaint. For suspected financial cyber fraud, contact your bank and call 1930 immediately.</p></main><footer><span>Built with Gnani AI · Prisma & Timbre</span><span>Speak freely. Review carefully.</span></footer></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Turn your consumer problem into a clear complaint. Speak or type in your language, review the facts, and take your next step.">
+  <meta name="theme-color" content="#183b33">
+  <title>Om Vaani — Your voice. A way forward.</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/style.css?v=20261029">
+  <script src="/static/app.js?v=20261029" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#assistant">Skip to the assistant</a>
+<header>
+  <a class="brand" href="/" aria-label="Om Vaani home"><span class="brand-icon" aria-hidden="true">ॐ</span><span>Om Vaani<span class="brand-caption">A little clarity. A way forward.</span></span></a>
+  <nav aria-label="Main navigation"><a href="#how">How it works</a><a class="nav-draft" href="/status">Find my draft <span aria-hidden="true">↗</span></a></nav>
+</header>
+<main id="main">
+  <section class="hero">
+    <div class="intro">
+      <span class="eyebrow"><span class="eyebrow-line" aria-hidden="true"></span> Made for your everyday rights</span>
+      <h1>Your voice.<br>A <em>way forward.</em></h1>
+      <p class="lead">An order that never came. A refund still waiting. Tell your side in your language. We’ll help you turn it into a clear complaint.</p>
+      <a class="intro-link" href="#assistant">Let’s put it into words <span aria-hidden="true">↗</span></a>
+      <div class="voice-mark" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      <div class="language-note"><span class="language-native">తెలుగు <span>हिन्दी</span> தமிழ்</span><p>Your words, in 10 languages.<br>One clear English draft to take with you.</p></div>
+      <aside id="draft-progress" class="draft-progress" hidden aria-label="Draft details so far"><span class="eyebrow">Your story, taking shape</span><h2 id="category-label">Your complaint</h2><dl id="draft-facts"></dl><p id="details-note" class="micro">Check these details before you confirm.</p></aside>
+    </div>
+    <section class="assistant" id="assistant" aria-labelledby="assistant-title">
+      <div class="assistant-top"><div class="assistant-heading"><span class="assistant-emblem" aria-hidden="true">ॐ</span><div><h2 id="assistant-title">Let’s hear your side.</h2><p id="assistant-subtitle">A conversation, at your pace.</p></div></div><span class="channel-label"><span class="live-dot"></span>Voice + text</span></div>
+      <ol class="flow-steps" aria-label="Your progress"><li id="step-tell" aria-current="step"><span>1</span> Tell your story</li><li id="step-review"><span>2</span> Review</li><li id="step-draft"><span>3</span> Your draft</li></ol>
+      <div class="assistant-body">
+        <div id="connection" class="connection-status" role="status">Connecting to your assistant…</div>
+        <form id="start-form">
+          <div class="form-intro"><span class="eyebrow">Start here</span><h3>A few details, then we’ll listen.</h3></div>
+          <label for="language">Which language feels like home?</label>
+          <select id="language" name="language"><option value="te-IN">తెలుగు · Telugu</option><option value="hi-IN">हिन्दी · Hindi</option><option value="en-IN">English</option><option value="ta-IN">தமிழ் · Tamil</option><option value="kn-IN">ಕನ್ನಡ · Kannada</option><option value="ml-IN">മലയാളം · Malayalam</option><option value="mr-IN">मराठी · Marathi</option><option value="bn-IN">বাংলা · Bengali</option><option value="gu-IN">ગુજરાતી · Gujarati</option><option value="pa-IN">ਪੰਜਾਬੀ · Punjabi</option></select>
+          <label for="phone">Your mobile number</label>
+          <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="Country code + mobile number" pattern="\+?[0-9]{10,15}" required aria-describedby="phone-help">
+          <p class="micro" id="phone-help">Keep the last 4 digits handy to find your saved draft later.</p>
+          <label class="check-label"><input id="consent" type="checkbox" required><span>I agree to let Gnani and Google process my messages and store draft details for lookup. I won’t share OTPs, passwords or bank account numbers.</span></label>
+          <button class="wide" type="submit">Start my conversation <span aria-hidden="true">↗</span></button>
+          <p class="form-footnote">You review the details. Nothing is sent on your behalf.</p>
+        </form>
+        <div id="chat" hidden>
+          <div class="chat-toolbar"><span id="chat-language"></span><label class="voice-toggle"><input type="checkbox" id="voice-enabled" checked><span>Voice replies</span></label></div>
+          <div id="conversation" class="conversation" role="log" aria-live="polite" aria-label="Conversation" tabindex="0"></div>
+          <div id="processing" class="processing" role="status" hidden><span class="thinking-dots" aria-hidden="true"><i></i><i></i><i></i></span><span id="processing-label">Preparing your reply…</span><span id="processing-time"></span></div>
+          <div id="review-actions" class="review-actions" hidden><p>Does this match what happened?</p><div><button id="confirm-details" type="button">Yes, these details are correct <span aria-hidden="true">✓</span></button><button id="correct-details" type="button" class="text-button">Make a correction</button></div></div>
+          <form id="message-form"><label for="message" class="sr-only">Your message</label><textarea id="message" placeholder="Tell us what happened…" maxlength="6000" rows="3"></textarea><div class="reply-tools"><div class="audio-tools"><button type="button" class="record-button" id="record"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4m-4 0h8"/></svg><span>Record</span></button><button type="button" class="text-button" id="upload">Upload audio</button><input type="file" id="audio-file" accept="audio/*" hidden></div><button type="submit" id="send">Send <span aria-hidden="true">↑</span></button></div><p id="record-status" class="micro" aria-live="polite">Speak for up to 60 seconds, or type. Shorter notes get a faster reply.</p></form>
+          <div id="chat-notice" class="notice" role="status" hidden></div>
+          <button type="button" class="text-button restart-button" id="restart">Start a new conversation ↗</button>
+        </div>
+      </div>
+      <div class="assistant-foot"><span aria-hidden="true">↳</span> Your voice stays yours. Review before you take the next step.</div>
+    </section>
+  </section>
+  <section id="how" class="how-section" aria-labelledby="how-title"><div class="how-heading"><span class="eyebrow">From a problem to a plan</span><h2 id="how-title">A little less stuck.</h2><p>Three small steps to make your next one clearer.</p></div><ol class="proof"><li><span class="step-number">01</span><div><h3>Say it your way.</h3><p>Speak or type in a language you’re comfortable with. We’ll ask for what’s missing.</p></div></li><li><span class="step-number">02</span><div><h3>Make sure it’s right.</h3><p>Review your story and correct any details. Your confirmation comes first.</p></div></li><li><span class="step-number">03</span><div><h3>Take it from here.</h3><p>Keep your English draft and reference, with suggested places to send it yourself.</p></div></li></ol></section>
+  <p class="disclaimer">Om Vaani is a drafting aid, not legal advice or a government service. Drafts are never automatically sent to a company or authority. Lookup tracks your saved draft, not an official case. For suspected financial cyber fraud, contact your bank and call 1930 immediately.</p>
+</main>
+<footer><a class="footer-brand" href="/">ॐ Om Vaani</a><span>Voice by Gnani AI · Prisma & Timbre</span><a href="/status">Find your saved draft ↗</a></footer>
+</body>
+</html>

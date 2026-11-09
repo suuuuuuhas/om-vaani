@@ -22,13 +22,32 @@ Without the Gemini key, grievance analysis falls back to deterministic offline r
 | Variable | Required | Purpose |
 |---|---|---|
 | `GEMINI_API_KEY` | For AI | Google Gemini reasoning key, server only. |
-| `GEMINI_MODEL` | No | Defaults to `gemini-3.6-flash`. |
+| `GEMINI_MODEL` | No | Defaults to `gemini-3.8-flash` for structured analysis. |
 | `GNANI_STT_API_KEY` | For voice input | Gnani Prisma v3 key, server only. |
 | `GNANI_TTS_API_KEY` | For voice output | Gnani Timbre key, server only. |
 | `SUPABASE_URL`, `SUPABASE_KEY` | Hosted | Private server credentials used for shared rate limiting. |
 
 With Gemini configured, live mode uses Gemini structured output and falls back to offline rules when it is unavailable. The legacy OpenAI-compatible adapter remains for existing test fixtures and optional configurations.
 
+
+### Remote development
+
+The current voice experience is in `civicbridge-app/` on branch `codex/vaani-streaming`.
+The root `app/` and `web/` folders contain the earlier Python Om Vaani app.
+
+In a remote checkout, run `cd civicbridge-app` and `npm ci`. Copy `.env.example`
+to `.env.local` and supply credentials through your remote environment's secret settings.
+Credentials, local databases and generated audio are intentionally excluded from Git.
+
+`npm run dev` previews the interface. The streaming `/api/voice/session` route uses
+Vercel's WebSocket runtime; plain `next dev` cannot run that connection. Test the
+full voice session on an authenticated Vercel preview (or a compatible `vercel dev`
+runtime). Keep production separate while reviewing changes.
+
+The conversation uses Gemini 3.8 Flash, with a disclosed 3.5 Flash-Lite fallback
+when the primary request times out or returns HTTP 503. Gnani Prisma handles
+recognition and Timbre handles speech. The Hear Vaani control and per-reply
+playback use `/api/voice/speak` directly, without a Gemini generation request.
 ## Scripts
 
 ```bash
@@ -99,3 +118,4 @@ Pages are Server Component shells; interactive islands (intake, review, dashboar
 ## Tool disclosure
 
 Built with Next.js 15 (App Router), React 19, Tailwind CSS 4 (custom token system, Noto Sans families), Zod, the OpenAI SDK, Vitest, and Playwright with @axe-core. AI assistance (Codex-class coding model) scaffolded, implemented, and tested the codebase under human direction; all third-party libraries are listed in `package.json`.
+

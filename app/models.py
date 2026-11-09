@@ -44,3 +44,4 @@ class TextTurn(BaseModel):
 
 class SpeechRequest(BaseModel):
     request_id: str | None = Field(default=None, min_length=8, max_length=100)
+    delivery: Literal['url', 'audio'] = 'url'

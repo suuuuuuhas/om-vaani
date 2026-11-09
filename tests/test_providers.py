@@ -31,6 +31,17 @@ async def test_gnani_stt_wire_contract(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_prisma_auto_language_reports_only_supported_language(monkeypatch):
+    monkeypatch.setattr(stt, 'settings', lambda:Settings(_env_file=None,gnani_stt_api_key='test-only'))
+    monkeypatch.setattr(stt, 'normalize_audio', AsyncMock(return_value=b'RIFFtest'))
+    def handler(request):
+        assert b'prisma-v3.0' in request.content and b'indic-auto' in request.content
+        return httpx.Response(200,json={'success':True,'transcript':'నా సమస్య','detected_language_code':'te-IN'})
+    client_for(monkeypatch,stt,handler)
+    assert await stt.transcribe_detect(b'input') == {'transcript':'నా సమస్య','language':'te-IN'}
+
+
+@pytest.mark.asyncio
 async def test_timbre_binary_ogg_contract(monkeypatch):
     monkeypatch.setattr(tts,'settings',lambda:Settings(_env_file=None,gnani_api_key='shared-unused',gnani_tts_api_key='tts-test-only'))
     def handler(request):
