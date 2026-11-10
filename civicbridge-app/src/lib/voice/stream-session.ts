@@ -24,7 +24,7 @@ export function startVoiceSession(client: WebSocket) {
   const send = (event: Record<string, unknown>) => { if (!destroyed && client.readyState === WebSocket.OPEN) client.send(JSON.stringify(event)); };
   function close() { if (destroyed) return; destroyed = true; clearTimeout(deadline); if (turnTimer) clearTimeout(turnTimer); request?.abort(); upstream?.close(); tts?.close(); if (client.readyState === WebSocket.OPEN) client.close(); }
   function cancelResponse() { if (!busy && !request && !tts) return; generation++; request?.abort(); request = null; tts?.close(); tts = null; busy = false; speaking = false; send({ type: "interrupted" }); }
-  function queueTurn() { if (turnTimer) clearTimeout(turnTimer); turnTimer = setTimeout(() => { turnTimer = null; const text = pending.trim(); pending = ""; if (text) void respond(text); }, 650); }
+  function queueTurn() { if (turnTimer) clearTimeout(turnTimer); turnTimer = setTimeout(() => { turnTimer = null; const text = pending.trim(); pending = ""; if (text) void respond(text); }, 150); }
   async function respond(text: string) {
     if (destroyed) return;
     if (!checkSensitiveContent(text).ok) { send({ type: "privacy_blocked", text }); return; }
@@ -37,10 +37,16 @@ export function startVoiceSession(client: WebSocket) {
     history.push({ role: "user", parts: [{ text }] });
     send({ type: "user_final", text, language: replyLanguage });
     send({ type: "thinking" });
-    // Extraction runs alongside the spoken response; only the latest result is shown.
-    void triageGrievance(allText, locale, undefined, replyLanguage).then(result => {
+    // Start background extraction only after the first speech chunk, so it
+    // doesn't compete with the conversational request for provider capacity.
+    let extractionStarted = false;
+    function extractDetails() {
+      if (extractionStarted || destroyed || turn !== generation) return;
+      extractionStarted = true;
+      void triageGrievance(allText, locale, undefined, replyLanguage).then(result => {
       if (!destroyed && turn === generation) send({ type: "details", data: result.data, mode: result.mode, text: allText, language: replyLanguage });
-    }).catch(() => { if (!destroyed && turn === generation) send({ type: "details_unavailable" }); });
+      }).catch(() => { if (!destroyed && turn === generation) send({ type: "details_unavailable" }); });
+    }
     const controller = new AbortController(); request = controller;
     let emitted = "", speechBuffer = "", streamDone = false, ttsReady = false, ttsBusy = false, ttsEnded = false;
     const queue: string[] = [];
@@ -70,7 +76,7 @@ export function startVoiceSession(client: WebSocket) {
       if (destroyed || turn !== generation) return;
       try {
         const event = JSON.parse(raw.toString()) as ProviderMessage;
-        if (event.type === "audio" && event.data?.audio) { speaking = true; send({ type: "audio", audio: event.data.audio, sampleRate: 24000 }); }
+        if (event.type === "audio" && event.data?.audio) { speaking = true; send({ type: "audio", audio: event.data.audio, sampleRate: 24000 }); extractDetails(); }
         if (event.type === "complete" || event.data?.is_final) { ttsBusy = false; pump(); }
         if (event.type === "error") failTts();
       } catch { failTts(); }
@@ -133,7 +139,7 @@ export function startVoiceSession(client: WebSocket) {
       started = true;
       if (message.locale === "hi" || message.locale === "te") locale = message.locale;
       if (message.textOnly) { send({ type: "ready" }); return; }
-      upstream = new WebSocket(STT_URL, { headers: { "x-api-key-id": sttKey, model: "prisma-v3.0", language_code: "indic-auto", format: "transcribe", "x-sample-rate": "16000", "x-min-silence-ms": "1800", "x-vad-threshold": "0.6", "x-idle-timeout-sec": "120" }, handshakeTimeout: 15000 });
+      upstream = new WebSocket(STT_URL, { headers: { "x-api-key-id": sttKey, model: "prisma-v3.0", language_code: "indic-auto", format: "transcribe", "x-sample-rate": "16000", "x-min-silence-ms": "900", "x-min-speech-ms": "200", "x-min-segment-ms": "200", "x-vad-threshold": "0.6", "x-idle-timeout-sec": "120" }, handshakeTimeout: 15000 });
       upstream.on("message", raw => {
         try {
           const event = JSON.parse(raw.toString()) as ProviderMessage;
@@ -158,5 +164,6 @@ export function startVoiceSession(client: WebSocket) {
   });
   client.on("close", close); client.on("error", close);
 }
+
 
 

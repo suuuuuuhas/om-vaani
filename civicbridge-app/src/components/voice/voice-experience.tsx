@@ -128,6 +128,8 @@ export function VoiceExperience() {
     } else if (data.type === "speech_end") {
       speechEnded.current = speechTime.current || performance.now(); setPhase("thinking");
     } else if (data.type === "transcript" && data.text) {
+      // Prisma v3 may deliver a transcript without a preceding processing event.
+      speechEnded.current = speechTime.current || performance.now();
       setPartial(previous => [previous, data.text].filter(Boolean).join(" "));
       if (!languageLocked.current && data.language) {
         languageRef.current = data.language; setVoiceLanguage(data.language);
@@ -173,7 +175,6 @@ export function VoiceExperience() {
       ws.onerror = () => { if (mounted.current) { setError("The voice connection failed. Open the Vercel preview, sign in if prompted, then try again."); setPhase("error"); } };
       ws.onclose = () => { if (socket.current === ws && mounted.current) { closeSession(); setError(words[localeRef.current].failure); setPhase("error"); } };
       await new Promise<void>((resolve, reject) => { ws.addEventListener("open", () => resolve(), { once: true }); ws.addEventListener("error", () => reject(new Error("socket")), { once: true }); });
-      ws.send(JSON.stringify({ type: "start", locale: localeRef.current, textOnly: !voice }));
       if (voice && stream.current) {
         await audioContext.audioWorklet.addModule("/vaani-capture.js");
         const source = audioContext.createMediaStreamSource(stream.current), node = new AudioWorkletNode(audioContext, "vaani-capture"), mute = audioContext.createGain();
@@ -184,6 +185,8 @@ export function VoiceExperience() {
           if (ws.bufferedAmount < 65536) ws.send(event.data.pcm);
         };
       }
+      // Advertise readiness only after the capture graph is installed.
+      ws.send(JSON.stringify({ type: "start", locale: localeRef.current, textOnly: !voice }));
     } catch (cause) { closeSession(); if (mounted.current) { const microphoneDenied = cause instanceof DOMException && ["NotAllowedError", "NotFoundError", "NotReadableError"].includes(cause.name); setError(microphoneDenied ? words[localeRef.current].micError : "The voice session couldn't start. Use the deployed preview; a plain local Next.js server cannot run this voice connection."); setPhase("error"); } }
   }
   async function speakDirect(text: string, granted = false) {

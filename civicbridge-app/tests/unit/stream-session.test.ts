@@ -22,7 +22,7 @@ it('does not discard a finalized transcript when another speech-start event arri
  const stt = state.sockets[1] as WebSocket;
  stt.emit('message',Buffer.from(JSON.stringify({type:'transcript',text:'The streetlight has been broken for two weeks.',detected_language_code:'en-IN'})));
  stt.emit('message',Buffer.from(JSON.stringify({type:'speech_start'})));
- await vi.advanceTimersByTimeAsync(700);
+ await vi.advanceTimersByTimeAsync(200);
  expect(fetchMock).toHaveBeenCalledTimes(1);
  expect(String(fetchMock.mock.calls[0][0])).toContain('gemini-3.5-flash-lite:');
 
@@ -32,6 +32,7 @@ it('does not discard a finalized transcript when another speech-start event arri
  expect(sent.some(e=>e.type==='model_fallback')).toBe(false);
  client.close();
 });
+
 
 
 
