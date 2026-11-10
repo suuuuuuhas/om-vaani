@@ -49,10 +49,14 @@ export function startVoiceSession(client: WebSocket) {
     }
     const controller = new AbortController(); request = controller;
     let emitted = "", speechBuffer = "", streamDone = false, ttsReady = false, ttsBusy = false, ttsEnded = false;
+    let speechWatchdog: ReturnType<typeof setTimeout> | null = null;
+    function clearSpeechWatchdog() { if (speechWatchdog) clearTimeout(speechWatchdog); speechWatchdog = null; }
+    function watchSpeech() { clearSpeechWatchdog(); speechWatchdog = setTimeout(failTts, 10000); }
     const queue: string[] = [];
     const ws = new WebSocket(TTS_URL, { headers: { "X-API-Key-ID": ttsKey }, handshakeTimeout: 15000 }); tts = ws;
     function failTts() {
       if (destroyed || turn !== generation || ttsEnded) return;
+      clearSpeechWatchdog();
       ttsEnded = true; queue.length = 0; busy = false;
       controller.abort(); if (request === controller) request = null;
       if (tts === ws) tts = null;
@@ -69,6 +73,7 @@ export function startVoiceSession(client: WebSocket) {
       const chunk = queue.shift()!;
       if (!checkSensitiveContent(chunk).ok) { send({ type: "error", code: "speech_blocked" }); queue.length = 0; streamDone = true; finishIfDone(); return; }
       ttsBusy = true;
+      watchSpeech();
       ws.send(JSON.stringify({ text: chunk, voice: "Shivani", model: "timbre-v3.0", language: replyLanguage, audio_config: { sample_rate: 24000, num_channels: 1, sample_width: 2, encoding: "linear_pcm", container: "raw" } }));
     }
     ws.on("open", () => { ttsReady = true; pump(); });
@@ -76,13 +81,13 @@ export function startVoiceSession(client: WebSocket) {
       if (destroyed || turn !== generation) return;
       try {
         const event = JSON.parse(raw.toString()) as ProviderMessage;
-        if (event.type === "audio" && event.data?.audio) { speaking = true; send({ type: "audio", audio: event.data.audio, sampleRate: 24000 }); extractDetails(); }
-        if (event.type === "complete" || event.data?.is_final) { ttsBusy = false; pump(); }
+        if (event.type === "audio" && event.data?.audio) { watchSpeech(); speaking = true; send({ type: "audio", audio: event.data.audio, sampleRate: 24000 }); extractDetails(); }
+        if (event.type === "complete" || event.data?.is_final) { clearSpeechWatchdog(); ttsBusy = false; pump(); }
         if (event.type === "error") failTts();
       } catch { failTts(); }
     });
     ws.on("error", failTts);
-    ws.on("close", () => { if (!ttsEnded && !controller.signal.aborted) failTts(); });
+    ws.on("close", () => { clearSpeechWatchdog(); if (!ttsEnded && !controller.signal.aborted) failTts(); });
     function feed(textPart: string, flush = false) {
       speechBuffer += textPart;
       // Speak complete clauses, never individual token fragments.

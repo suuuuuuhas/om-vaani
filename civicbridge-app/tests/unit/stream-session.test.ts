@@ -36,3 +36,18 @@ it('does not discard a finalized transcript when another speech-start event arri
 
 
 
+
+it('reports a stalled speech stream instead of waiting forever', async () => {
+ vi.useFakeTimers();
+ vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('data: {"candidates":[{"content":{"parts":[{"text":"I understand the streetlight is broken. Where is it located?"}]}}]}\n\n', {status:200})));
+ const client = new WebSocket('ws://test'); startVoiceSession(client);
+ client.emit('message',Buffer.from(JSON.stringify({type:'start',textOnly:true})),false);
+ client.emit('message',Buffer.from(JSON.stringify({type:'text',text:'The streetlight has been broken for two weeks.'})),false);
+ await vi.advanceTimersByTimeAsync(20);
+ const tts = state.sockets[1] as WebSocket; tts.emit('open');
+ await vi.advanceTimersByTimeAsync(10050);
+ const sent = (client.send as ReturnType<typeof vi.fn>).mock.calls.map(args=>JSON.parse(args[0]));
+ expect(sent.some(e=>e.type==='error' && e.code==='voice_unavailable')).toBe(true);
+ expect(sent.some(e=>e.type==='response_complete')).toBe(false);
+ client.close();
+});
